@@ -196,7 +196,14 @@ failure echoes back exactly what was sent.
 
 ## Console
 
-<http://localhost:4200> — one panel per endpoint with an editable request body
+Served two ways:
+
+- **Deployed / Docker** — at the API's own root, `http://<host>:4000/`. The image
+  builds it and Express serves the static files from the same origin.
+- **Local development** — `npm run dev`, on <http://localhost:4200>, with hot
+  reload and Vite proxying API calls to `:4000`.
+
+One panel per endpoint with an editable request body
 (edit it into invalid JSON to demo the `400` branch), the raw response, the HTTP
 status, and **what the agent would say** with that payload. Below them, the
 tickets raised so far.
@@ -213,9 +220,8 @@ their own key instead, and the deployed console is inert until they do.
 
 ## Deploying (for devops)
 
-**Deploy the `server` only.** The React console is a local development tool — it
-needs no deployment for the team to use the APIs, which they call directly with
-the key.
+One container serves both the API and the console — the image builds the React
+app and Express serves it from the same origin.
 
 ### Option A — Docker Compose (recommended)
 
@@ -232,9 +238,17 @@ starts.
 
 | | |
 |---|---|
-| API | `http://localhost:4000` (`API_HOST_PORT` to change) |
+| **Console** | `http://localhost:4000/` — the full UI, key bar and Send buttons |
+| API | `http://localhost:4000/account/balance_usage`, `/ticket/create` |
 | Mongo | bundled, data in the `mongo-data` volume |
 | Health | `GET /demo/health` |
+
+The image builds the React console and the API server **serves it from its own
+origin**, so one URL gives you both — no proxy, no CORS, no second deployment.
+Opening the base URL in a browser gets the console rather than a 404.
+
+Anyone can load the page, but it does nothing until a key is pasted into the bar
+at the top, so publishing it doesn't widen access.
 
 Seeding happens automatically on container boot. It's an idempotent upsert, so
 restarts don't duplicate subscribers and **don't** wipe tickets or reset the
@@ -255,9 +269,13 @@ Node 20+. From the repo root:
 
 ```bash
 npm install
+npm run build    # builds the console; skip it to run the API alone
 npm run seed     # ONCE, after the database is reachable
 npm start
 ```
+
+Express serves `client/dist` if that directory exists, so `npm run build` is
+what makes the console appear at `/`. Without it you get the API only.
 
 Skipping `npm run seed` leaves the database empty, and then **every lookup
 returns `404 Subscriber not found`** — that's the first thing to check if the
