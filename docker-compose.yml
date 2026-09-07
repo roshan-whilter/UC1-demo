@@ -1,0 +1,57 @@
+# UC1 demo mock API — API + MongoDB.
+#
+#   cp .env.example .env     # then set API_KEYS
+#   docker compose up -d
+#
+# Ports are deliberately non-default (4000 API, 27018 Mongo) so this stack can
+# run alongside other local services without clashing.
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-root}
+    ports:
+      # Host-side only, for inspecting the data with a GUI. Remove to keep the
+      # database reachable solely from the api container.
+      - "${MONGO_HOST_PORT:-27018}:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # The api container seeds on boot, so it must not start until Mongo is
+      # actually accepting queries — not merely running.
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${API_HOST_PORT:-4000}:4000"
+    environment:
+      # Mandatory. Compose aborts with this message if it isn't set.
+      API_KEYS: ${API_KEYS:?set API_KEYS in .env — the server will not start without it}
+      # Defaults to the bundled mongodb service; override in .env to point at a
+      # managed database (Atlas) instead.
+      MONGO_URI: ${MONGO_URI:-mongodb://root:${MONGO_ROOT_PASSWORD:-root}@mongodb:27017/uc1_demo_mock?authSource=admin}
+      # Without this the container runs UTC, shifting every response timestamp
+      # and the date inside every ticketId.
+      TZ: ${TZ:-Asia/Phnom_Penh}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/demo/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  mongo-data:

@@ -217,7 +217,41 @@ their own key instead, and the deployed console is inert until they do.
 needs no deployment for the team to use the APIs, which they call directly with
 the key.
 
-Three commands, run from the repo root:
+### Option A — Docker Compose (recommended)
+
+Brings up the API and its MongoDB together. Two steps:
+
+```bash
+cp .env.example .env     # then set API_KEYS in it
+docker compose up -d
+```
+
+That's the whole deploy. Compose **refuses to start** if `API_KEYS` is unset,
+and the API container waits for Mongo to pass a real health check before it
+starts.
+
+| | |
+|---|---|
+| API | `http://localhost:4000` (`API_HOST_PORT` to change) |
+| Mongo | bundled, data in the `mongo-data` volume |
+| Health | `GET /demo/health` |
+
+Seeding happens automatically on container boot. It's an idempotent upsert, so
+restarts don't duplicate subscribers and **don't** wipe tickets or reset the
+ticketId sequence.
+
+To use a managed database (Atlas) instead of the bundled one, set `MONGO_URI` in
+`.env` — it overrides the default and the `mongodb` service can be deleted.
+
+```bash
+docker compose logs -f api      # follow logs
+docker compose down             # stop, keep data
+docker compose down -v          # stop, delete data
+```
+
+### Option B — plain Node
+
+Node 20+. From the repo root:
 
 ```bash
 npm install
@@ -227,12 +261,16 @@ npm start
 
 Skipping `npm run seed` leaves the database empty, and then **every lookup
 returns `404 Subscriber not found`** — that's the first thing to check if the
-API is up but nothing resolves.
+API is up but nothing resolves. (The Docker path runs this for you.)
 
 ### Environment variables
 
-Set these on the host (Render/Railway/Fly/ECS env panel, or a compose file) —
-**not** in a committed file. `server/.env` is gitignored and must stay that way.
+For Docker, these go in the repo-root `.env` (see `.env.example`). For plain
+Node, in `server/.env`. Either way — **not** in a committed file; both are
+gitignored and must stay that way.
+
+Only `API_KEYS` has no default, and only `MONGO_URI`'s default is wrong for a
+deployment. Everything else can be left alone.
 
 | Var | Required | Value |
 |-----|----------|-------|
