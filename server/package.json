@@ -1,0 +1,23 @@
+{
+  "name": "uc1-demo-mock-api-server",
+  "version": "1.0.0",
+  "description": "UC1 demo mock API — balance/usage lookup and callback ticket creation",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node seed/seed.js",
+    "test": "LOG_LEVEL=error API_KEYS=test-key-primary,test-key-secondary node --test \"tests/**/*.test.js\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.0.0"
+  }
+}

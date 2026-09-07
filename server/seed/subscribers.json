@@ -1,0 +1,47 @@
+[
+  {
+    "msisdn": "85510234567",
+    "name": "Sok Dara",
+    "type": "PREPAID",
+    "balance": {
+      "main": { "amount": 2.75, "currency": "USD", "expiry": "20261005" },
+      "bonus": { "amount": 0.5, "currency": "USD", "expiry": "20260915" }
+    },
+    "data": {
+      "allowanceMB": 10240,
+      "usedMB": 7680,
+      "remainingMB": 2560,
+      "expiry": "20260930"
+    }
+  },
+  {
+    "msisdn": "85510555111",
+    "name": "Chan Sophea",
+    "type": "POSTPAID",
+    "balance": {
+      "main": { "amount": 12.4, "currency": "USD", "expiry": "20261130" },
+      "bonus": null
+    },
+    "data": {
+      "allowanceMB": 51200,
+      "usedMB": 48000,
+      "remainingMB": 3200,
+      "expiry": "20260930"
+    }
+  },
+  {
+    "msisdn": "85510777222",
+    "name": "Kim Veasna",
+    "type": "PREPAID",
+    "balance": {
+      "main": { "amount": 0, "currency": "USD", "expiry": "20260910" },
+      "bonus": null
+    },
+    "data": {
+      "allowanceMB": 2048,
+      "usedMB": 2048,
+      "remainingMB": 0,
+      "expiry": "20260912"
+    }
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "name": "uc1-demo-mock-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "UC1 demo mock APIs (MERN) — balance & usage lookup plus callback ticket creation",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "npm run dev --workspace server",
+    "dev:client": "npm run dev --workspace client",
+    "start": "npm run start --workspace server",
+    "seed": "npm run seed --workspace server",
+    "test": "npm run test --workspace server",
+    "build": "npm run build --workspace client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
