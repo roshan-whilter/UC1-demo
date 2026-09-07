@@ -43,5 +43,50 @@
       "remainingMB": 0,
       "expiry": "20260912"
     }
+  },
+  {
+    "msisdn": "9654987095",
+    "name": "Guneet Gandhiok",
+    "type": "PREPAID",
+    "balance": {
+      "main": { "amount": 5.0, "currency": "USD", "expiry": "20261005" },
+      "bonus": null
+    },
+    "data": {
+      "allowanceMB": 10240,
+      "usedMB": 4096,
+      "remainingMB": 6144,
+      "expiry": "20260930"
+    }
+  },
+  {
+    "msisdn": "9870566624",
+    "name": "Raghav Kumaria",
+    "type": "PREPAID",
+    "balance": {
+      "main": { "amount": 8.2, "currency": "USD", "expiry": "20261020" },
+      "bonus": { "amount": 1.5, "currency": "USD", "expiry": "20260925" }
+    },
+    "data": {
+      "allowanceMB": 20480,
+      "usedMB": 12288,
+      "remainingMB": 8192,
+      "expiry": "20261010"
+    }
+  },
+  {
+    "msisdn": "919899047146",
+    "name": "Ravinder Malhotra",
+    "type": "POSTPAID",
+    "balance": {
+      "main": { "amount": 15.75, "currency": "USD", "expiry": "20261130" },
+      "bonus": null
+    },
+    "data": {
+      "allowanceMB": 51200,
+      "usedMB": 20480,
+      "remainingMB": 30720,
+      "expiry": "20261015"
+    }
   }
 ]

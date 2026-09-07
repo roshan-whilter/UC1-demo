@@ -2,7 +2,11 @@ import { Router } from "express";
 import mongoose from "mongoose";
 import { config } from "../config/env.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
-import { listSubscribers } from "../services/subscriberService.js";
+import {
+  listSubscribers,
+  addSubscriber,
+  ValidationError,
+} from "../services/subscriberService.js";
 import { listTickets } from "../services/ticketService.js";
 import { logger } from "../utils/logger.js";
 
@@ -44,6 +48,32 @@ router.get("/subscribers", async (req, res) => {
   } catch (err) {
     logger.error("demo/subscribers failed", err);
     res.status(500).json({ message: "Unable to list subscribers" });
+  }
+});
+
+/**
+ * Add a subscriber to a running instance, so testers can put their own numbers
+ * in without a redeploy. Only msisdn and name are required.
+ *
+ * Ordinary HTTP codes here (201/200/400), like the rest of /demo — the
+ * SUCCESS/FAILURE envelope belongs to the two spec endpoints.
+ */
+router.post("/subscribers", async (req, res) => {
+  try {
+    const { created, subscriber } = await addSubscriber(req.body);
+    logger.info(
+      `demo/subscribers ${created ? "created" : "updated"} ${subscriber.msisdn} (${subscriber.name})`
+    );
+    res.status(created ? 201 : 200).json({
+      message: created ? "Subscriber added" : "Subscriber updated",
+      subscriber,
+    });
+  } catch (err) {
+    if (err instanceof ValidationError) {
+      return res.status(400).json({ message: err.message });
+    }
+    logger.error("demo/subscribers add failed", err);
+    res.status(500).json({ message: "Unable to add subscriber" });
   }
 });
 

@@ -55,9 +55,12 @@ async function seed() {
   }
 
   logger.info(`\nDemo numbers:`);
-  logger.info(`  SUCCESS  85510234567  (matches the spec's example payload)`);
-  logger.info(`  SUCCESS  85510555111  (POSTPAID, bonus: null)`);
-  logger.info(`  SUCCESS  85510777222  (zero balance, data exhausted)`);
+  logger.info(`  SUCCESS  85510234567   (matches the spec's example payload)`);
+  logger.info(`  SUCCESS  85510555111   (POSTPAID, bonus: null)`);
+  logger.info(`  SUCCESS  85510777222   (zero balance, data exhausted)`);
+  logger.info(`  SUCCESS  9654987095    Guneet Gandhiok`);
+  logger.info(`  SUCCESS  9870566624    Raghav Kumaria (has a bonus wallet)`);
+  logger.info(`  SUCCESS  919899047146  Ravinder Malhotra (POSTPAID)`);
   logger.info(`  404      any unseeded number, e.g. 85510000000`);
   logger.info(
     `  500      ${config.forceBalanceErrorMsisdns.join(", ") || "(none configured)"}`

@@ -181,6 +181,9 @@ Seeded by `npm run seed`, chosen so both paths of the flow can be shown live.
 | `85510234567` | SUCCESS — the spec's example payload, field for field |
 | `85510555111` | SUCCESS — POSTPAID, `bonus: null` |
 | `85510777222` | SUCCESS — zero balance, data exhausted (`remainingMB: 0`) |
+| `9654987095` | SUCCESS — Guneet Gandhiok |
+| `9870566624` | SUCCESS — Raghav Kumaria, has a bonus wallet |
+| `919899047146` | SUCCESS — Ravinder Malhotra, POSTPAID |
 | `85510000000` | FAILURE `404` — any unseeded number does this |
 | `85510999500` | FAILURE `500` — forces the internal-error branch on **both** endpoints |
 
@@ -191,6 +194,13 @@ They're checked before the DB lookup, so a forced `500` beats a would-be `404`.
 `msisdn` matching is on digits only, so `+855 10 234 567` resolves to
 `85510234567`. The success response returns the stored canonical number; a
 failure echoes back exactly what was sent.
+
+If the exact digits don't match, the **last 10 digits** are tried — so a number
+stored as `9654987095` still resolves when a call arrives as `+919654987095`,
+and vice versa. Real CLI delivery isn't consistent about the country code, and
+without this a subscriber added one way 404s when dialled the other. The
+fallback only applies when exactly one stored number matches that tail, so two
+numbers sharing a suffix resolve to nobody rather than to the wrong account.
 
 ---
 
@@ -345,14 +355,56 @@ drift endpoint to endpoint.
 Mounted under `/demo` so they can't be confused with the two documented
 endpoints.
 
-| Route | Key | Returns |
+| Route | Key | Purpose |
 |-------|-----|---------|
 | `GET /demo/health` | not required | liveness only — no data, no config |
-| `GET /demo/subscribers` | **required** | the seeded subscribers |
+| `GET /demo/subscribers` | **required** | list the stored subscribers |
+| `POST /demo/subscribers` | **required** | add a subscriber to a running instance |
 | `GET /demo/tickets?limit=20` | **required** | recent tickets |
 
-The two data routes need a key because they return customer-shaped records —
-leaving them open would undo the point of protecting the endpoints they support.
+Everything but health needs a key: these return and accept customer-shaped
+records, so leaving them open would undo the point of protecting the endpoints
+they support.
+
+### Adding a subscriber without a redeploy
+
+`POST /demo/subscribers` exists so testers can put their own numbers in against
+a deployed instance. Only `msisdn` and `name` are required:
+
+```bash
+curl -X POST http://<host>:4000/demo/subscribers \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"msisdn":"9654987095","name":"Guneet Gandhiok"}'
+```
+
+Everything else defaults — `PREPAID`, $5.00 main balance, no bonus, a 10 GB
+bundle with nothing used, expiries 30 days out. Override any of it:
+
+```bash
+curl -X POST http://<host>:4000/demo/subscribers \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "msisdn": "9870566624",
+    "name": "Raghav Kumaria",
+    "type": "POSTPAID",
+    "balance": {
+      "main":  { "amount": 8.20, "currency": "USD", "expiry": "20261020" },
+      "bonus": { "amount": 1.50, "currency": "USD", "expiry": "20260925" }
+    },
+    "data": { "allowanceMB": 20480, "usedMB": 12288, "expiry": "20261010" }
+  }'
+```
+
+- `201` on create, `200` when it replaced an existing record (upsert by number,
+  so re-posting never duplicates), `400` with a message for a bad body.
+- `remainingMB` is derived from `allowanceMB - usedMB` unless you send it, so
+  the figure the agent reads out can't contradict the other two.
+- The number is stored digits-only, so `+91 98990 47146` and `919899047146`
+  are the same record.
+- Added subscribers survive container restarts — they live in the Mongo volume,
+  not the image.
 
 ---
 

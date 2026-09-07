@@ -49,6 +49,9 @@ export const DEMO_NUMBERS = [
   { msisdn: "85510234567", label: "Healthy account", hint: "SUCCESS — the spec's example payload" },
   { msisdn: "85510555111", label: "POSTPAID", hint: "SUCCESS — bonus is null" },
   { msisdn: "85510777222", label: "Empty account", hint: "SUCCESS — zero balance, data exhausted" },
+  { msisdn: "9654987095", label: "Guneet Gandhiok", hint: "SUCCESS — added for live-call testing" },
+  { msisdn: "9870566624", label: "Raghav Kumaria", hint: "SUCCESS — has a bonus wallet" },
+  { msisdn: "919899047146", label: "Ravinder Malhotra", hint: "SUCCESS — POSTPAID" },
   { msisdn: "85510000000", label: "Unknown number", hint: "FAILURE 404 — Subscriber not found" },
   { msisdn: "85510999500", label: "Broken backend", hint: "FAILURE 500 — internal error" },
 ];
