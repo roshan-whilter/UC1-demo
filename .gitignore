@@ -3,3 +3,8 @@ dist/
 .env
 *.log
 .DS_Store
+
+# Internal specs and workflow diagrams — kept local, not published to GitHub
+UC1-DEMO-MOCK-APIS.md
+UC1-BRANCH-B-MOCK-APIS.md
+1-Balance & Data Usage Check.svg

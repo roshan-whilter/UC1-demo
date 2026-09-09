@@ -20,13 +20,28 @@ services:
     volumes:
       - mongo-data:/data/db
     healthcheck:
-      # The api container seeds on boot, so it must not start until Mongo is
-      # actually accepting queries — not merely running.
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 12
-      start_period: 10s
+      # Must authenticate: this mongod runs with auth enabled, and an
+      # unauthenticated mongosh never completes server selection — it reports
+      # "Server selection timed out" and the container is marked unhealthy even
+      # though Mongo is serving traffic normally.
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--username",
+          "root",
+          "--password",
+          "${MONGO_ROOT_PASSWORD:-root}",
+          "--authenticationDatabase",
+          "admin",
+          "--eval",
+          "db.adminCommand({ping:1}).ok",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 20s
 
   api:
     build: .
@@ -44,8 +59,14 @@ services:
       TZ: ${TZ:-Asia/Phnom_Penh}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
+      # Deliberately service_started, NOT service_healthy. A wrong healthcheck
+      # once left Mongo marked unhealthy while it was serving fine, and a
+      # service_healthy gate turned that into "the whole API never starts".
+      # Starting early is safe instead: if Mongo isn't ready the seed step
+      # fails, the container exits, and `restart: unless-stopped` retries until
+      # it is — the stack heals itself rather than deadlocking.
       mongodb:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:4000/demo/health"]
       interval: 30s
