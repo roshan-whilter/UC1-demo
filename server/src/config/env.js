@@ -32,4 +32,8 @@ export const config = {
   forceTicketErrorMsisdns: list(
     process.env.FORCE_TICKET_ERROR_MSISDNS ?? "85510999500"
   ),
+  // Branch B: msisdns that force the usage_history 500 branch.
+  forceUsageErrorMsisdns: list(
+    process.env.FORCE_USAGE_ERROR_MSISDNS ?? "85510999500"
+  ),
 };

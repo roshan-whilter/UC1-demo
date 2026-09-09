@@ -38,6 +38,9 @@ async function postJson(path, body) {
 export const callBalanceUsage = (rawBody) =>
   postJson("/account/balance_usage", rawBody);
 
+export const callUsageHistory = (rawBody) =>
+  postJson("/account/usage_history", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */

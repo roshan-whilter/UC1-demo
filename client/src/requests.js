@@ -26,6 +26,17 @@ export const balanceUsageRequest = (msisdn = "85510234567") =>
     2
   );
 
+export const usageHistoryRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-usg-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+    },
+    null,
+    2
+  );
+
 export const ticketCreateRequest = (msisdn = "85510234567") =>
   JSON.stringify(
     {

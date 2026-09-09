@@ -75,3 +75,23 @@ export function ticketReadback(body) {
 
   return `Thank you. I've raised this for you — your reference is ${body.ticket.ticketId}. One of our colleagues will call you back on this number.`;
 }
+
+/**
+ * Branch B: what the agent says after the usage_history lookup, following the
+ * flow — explain the cause if found, otherwise escalate to a human.
+ */
+export function usageReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    return "I'm sorry — I can't pull your usage history up right now. Let me put you through to a colleague who can look into this for you.";
+  }
+
+  const { subscriber, cause } = body;
+
+  if (!cause.identified) {
+    return `I'm sorry ${subscriber.name}, I've checked your usage for the last month and I can't find anything that explains the deduction you're describing. Let me put you through to a colleague who can look into it further.`;
+  }
+
+  return `Thanks ${subscriber.name}. I've looked into it — ${cause.summary} Does that resolve your question, or is there anything else I can help with?`;
+}

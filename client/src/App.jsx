@@ -3,43 +3,60 @@ import ApiKeyBar from "./components/ApiKeyBar.jsx";
 import EndpointPanel from "./components/EndpointPanel.jsx";
 import NumberPicker from "./components/NumberPicker.jsx";
 import TicketList from "./components/TicketList.jsx";
+import SubscriberList from "./components/SubscriberList.jsx";
 import {
   callBalanceUsage,
+  callUsageHistory,
   callTicketCreate,
   fetchTickets,
+  fetchSubscribers,
   UnauthorizedError,
 } from "./api.js";
 import { loadApiKey, saveApiKey } from "./apiKey.js";
-import { balanceUsageRequest, ticketCreateRequest } from "./requests.js";
-import { balanceReadback, ticketReadback } from "./readback.js";
+import {
+  balanceUsageRequest,
+  usageHistoryRequest,
+  ticketCreateRequest,
+} from "./requests.js";
+import { balanceReadback, usageReadback, ticketReadback } from "./readback.js";
 
 export default function App() {
   const [apiKey, setApiKey] = useState(loadApiKey);
   const [msisdn, setMsisdn] = useState("85510234567");
   const [balanceBody, setBalanceBody] = useState(() => balanceUsageRequest());
+  const [usageBody, setUsageBody] = useState(() => usageHistoryRequest());
   const [ticketBody, setTicketBody] = useState(() => ticketCreateRequest());
   const [balanceResult, setBalanceResult] = useState(null);
+  const [usageResult, setUsageResult] = useState(null);
   const [ticketResult, setTicketResult] = useState(null);
   const [tickets, setTickets] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
   const [keyState, setKeyState] = useState(apiKey ? "unverified" : "missing");
   const [error, setError] = useState(null);
 
-  // Loading the ticket list doubles as the key check — it's the first
-  // authenticated call the page makes.
-  const refreshTickets = useCallback(async () => {
+  // Loading the lists doubles as the key check — the first authenticated calls
+  // the page makes.
+  const refreshData = useCallback(async () => {
     if (!loadApiKey()) {
       setKeyState("missing");
       setTickets([]);
+      setSubscribers([]);
       return;
     }
     try {
-      setTickets(await fetchTickets());
+      const [ticketList, subs] = await Promise.all([
+        fetchTickets(),
+        fetchSubscribers(),
+      ]);
+      setTickets(ticketList);
+      setSubscribers(subs.subscribers ?? []);
       setKeyState("valid");
       setError(null);
     } catch (err) {
       if (err instanceof UnauthorizedError) {
         setKeyState("rejected");
         setTickets([]);
+        setSubscribers([]);
         setError("That key was rejected. Check it with whoever runs the API.");
       } else {
         setKeyState("unverified");
@@ -49,8 +66,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    refreshTickets();
-  }, [refreshTickets, apiKey]);
+    refreshData();
+  }, [refreshData, apiKey]);
 
   const changeApiKey = (next) => {
     saveApiKey(next);
@@ -59,11 +76,12 @@ export default function App() {
     setError(null);
   };
 
-  // Picking a caller number rebuilds both bodies, so the two calls stay about
+  // Picking a caller number rebuilds all three bodies, so the calls stay about
   // the same subscriber the way they would in a real call.
   const pickNumber = (next) => {
     setMsisdn(next);
     setBalanceBody(balanceUsageRequest(next));
+    setUsageBody(usageHistoryRequest(next));
     setTicketBody(ticketCreateRequest(next));
   };
 
@@ -73,11 +91,17 @@ export default function App() {
     if (result.httpStatus === 401) setKeyState("rejected");
   };
 
+  const sendUsage = async (body) => {
+    const result = await callUsageHistory(body);
+    setUsageResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+  };
+
   const sendTicket = async (body) => {
     const result = await callTicketCreate(body);
     setTicketResult(result);
     if (result.httpStatus === 401) setKeyState("rejected");
-    else await refreshTickets();
+    else await refreshData();
   };
 
   // A 401 is a transport rejection, not a call outcome — the agent would never
@@ -99,9 +123,9 @@ export default function App() {
           <h1>UC1 Demo Console</h1>
           <p className="app__subtitle">
             Mock telco APIs for the inbound-call demo — balance &amp; usage
-            lookup, then a callback ticket. Every response is HTTP 200; the
-            outcome is in <code>status</code>. Both endpoints require an{" "}
-            <code>x-api-key</code> header.
+            lookup (Branch A), usage-history &amp; CDR (Branch B), then a ticket.
+            Every response is HTTP 200; the outcome is in <code>status</code>.
+            All endpoints require an <code>x-api-key</code> header.
           </p>
         </div>
       </header>
@@ -121,7 +145,7 @@ export default function App() {
       <div className="grid">
         <EndpointPanel
           path="/account/balance_usage"
-          description="Called once, right after the call lands."
+          description="Branch A — called once, right after the call lands."
           body={balanceBody}
           onBodyChange={setBalanceBody}
           onSend={sendBalance}
@@ -130,8 +154,18 @@ export default function App() {
         />
 
         <EndpointPanel
+          path="/account/usage_history"
+          description="Branch B — when the caller says balance or data went missing."
+          body={usageBody}
+          onBodyChange={setUsageBody}
+          onSend={sendUsage}
+          result={usageResult}
+          readback={readbackFor(usageResult, usageReadback)}
+        />
+
+        <EndpointPanel
           path="/ticket/create"
-          description="Called only when the caller reports an issue — or after a failed lookup."
+          description="Shared — log the issue and read back the reference."
           body={ticketBody}
           onBodyChange={setTicketBody}
           onSend={sendTicket}
@@ -140,7 +174,8 @@ export default function App() {
         />
       </div>
 
-      <TicketList tickets={tickets} onRefresh={refreshTickets} />
+      <SubscriberList subscribers={subscribers} onRefresh={refreshData} />
+      <TicketList tickets={tickets} onRefresh={refreshData} />
     </div>
   );
 }

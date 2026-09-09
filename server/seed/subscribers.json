@@ -12,6 +12,28 @@
       "usedMB": 7680,
       "remainingMB": 2560,
       "expiry": "20260930"
+    },
+    "usageHistory": {
+      "cause": {
+        "identified": true,
+        "type": "DATA_USAGE",
+        "summary": "A 1850 MB video streaming session ran from 01:12 to 04:37 on 8 September."
+      },
+      "internetUsage": {
+        "totalUsedMB": 7680,
+        "records": [
+          { "startedAt": "20260908011200", "endedAt": "20260908043700", "usedMB": 1850, "network": "4G", "category": "STREAMING" },
+          { "startedAt": "20260906193000", "endedAt": "20260906201500", "usedMB": 420, "network": "4G", "category": "SOCIAL" }
+        ]
+      },
+      "vasDeductions": {
+        "totalAmount": 0.75,
+        "currency": "USD",
+        "records": [
+          { "chargedAt": "20260905090000", "service": "CallerTune", "amount": 0.5, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" },
+          { "chargedAt": "20260901121500", "service": "NewsAlerts", "amount": 0.25, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" }
+        ]
+      }
     }
   },
   {
@@ -27,6 +49,27 @@
       "usedMB": 48000,
       "remainingMB": 3200,
       "expiry": "20260930"
+    },
+    "usageHistory": {
+      "cause": {
+        "identified": true,
+        "type": "VAS_DEDUCTION",
+        "summary": "A 0.99 USD WeatherPlus subscription auto-renewed on 3 September, which is the deduction the customer noticed."
+      },
+      "internetUsage": {
+        "totalUsedMB": 640,
+        "records": [
+          { "startedAt": "20260904103000", "endedAt": "20260904110000", "usedMB": 640, "network": "5G", "category": "BROWSING" }
+        ]
+      },
+      "vasDeductions": {
+        "totalAmount": 1.24,
+        "currency": "USD",
+        "records": [
+          { "chargedAt": "20260903080000", "service": "WeatherPlus", "amount": 0.99, "currency": "USD", "chargeType": "AUTO_RENEWAL", "status": "CHARGED" },
+          { "chargedAt": "20260901121500", "service": "NewsAlerts", "amount": 0.25, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" }
+        ]
+      }
     }
   },
   {
@@ -42,6 +85,15 @@
       "usedMB": 2048,
       "remainingMB": 0,
       "expiry": "20260912"
+    },
+    "usageHistory": {
+      "cause": {
+        "identified": false,
+        "type": "NONE",
+        "summary": "No usage session or VAS charge in the last month accounts for the reported deduction."
+      },
+      "internetUsage": { "totalUsedMB": 0, "records": [] },
+      "vasDeductions": { "totalAmount": 0, "currency": "USD", "records": [] }
     }
   },
   {
@@ -57,6 +109,21 @@
       "usedMB": 4096,
       "remainingMB": 6144,
       "expiry": "20260930"
+    },
+    "usageHistory": {
+      "cause": {
+        "identified": true,
+        "type": "DATA_USAGE",
+        "summary": "A 2100 MB app download ran at 22:40 on 6 September, which used most of the data the customer reported missing."
+      },
+      "internetUsage": {
+        "totalUsedMB": 2560,
+        "records": [
+          { "startedAt": "20260906224000", "endedAt": "20260906231500", "usedMB": 2100, "network": "4G", "category": "DOWNLOAD" },
+          { "startedAt": "20260903184500", "endedAt": "20260903190000", "usedMB": 460, "network": "4G", "category": "SOCIAL" }
+        ]
+      },
+      "vasDeductions": { "totalAmount": 0, "currency": "USD", "records": [] }
     }
   },
   {
@@ -72,6 +139,26 @@
       "usedMB": 12288,
       "remainingMB": 8192,
       "expiry": "20261010"
+    },
+    "usageHistory": {
+      "cause": {
+        "identified": true,
+        "type": "VAS_DEDUCTION",
+        "summary": "A 1.00 USD GamingPass subscription renewed on 4 September; that is the charge the customer queried."
+      },
+      "internetUsage": {
+        "totalUsedMB": 1180,
+        "records": [
+          { "startedAt": "20260905201000", "endedAt": "20260905213000", "usedMB": 1180, "network": "4G", "category": "STREAMING" }
+        ]
+      },
+      "vasDeductions": {
+        "totalAmount": 1.0,
+        "currency": "USD",
+        "records": [
+          { "chargedAt": "20260904070000", "service": "GamingPass", "amount": 1.0, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" }
+        ]
+      }
     }
   },
   {
@@ -87,6 +174,27 @@
       "usedMB": 20480,
       "remainingMB": 30720,
       "expiry": "20261015"
+    },
+    "usageHistory": {
+      "cause": {
+        "identified": true,
+        "type": "MIXED",
+        "summary": "A 3200 MB video streaming session on 7 September plus a 1.49 USD MoviesClub renewal on 2 September together explain the deduction."
+      },
+      "internetUsage": {
+        "totalUsedMB": 3900,
+        "records": [
+          { "startedAt": "20260907203000", "endedAt": "20260907234500", "usedMB": 3200, "network": "5G", "category": "STREAMING" },
+          { "startedAt": "20260905091500", "endedAt": "20260905093000", "usedMB": 700, "network": "4G", "category": "BROWSING" }
+        ]
+      },
+      "vasDeductions": {
+        "totalAmount": 1.49,
+        "currency": "USD",
+        "records": [
+          { "chargedAt": "20260902060000", "service": "MoviesClub", "amount": 1.49, "currency": "USD", "chargeType": "AUTO_RENEWAL", "status": "CHARGED" }
+        ]
+      }
     }
   }
 ]

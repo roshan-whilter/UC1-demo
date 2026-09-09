@@ -377,6 +377,15 @@ code {
 
 /* --- tickets --- */
 
+/* Wide tables scroll inside their own box rather than widening the page. */
+.table-scroll {
+  overflow-x: auto;
+}
+
+.muted {
+  color: var(--muted);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;

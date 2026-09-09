@@ -1,19 +1,25 @@
 import { Router } from "express";
 import { balanceUsage } from "../controllers/balanceUsageController.js";
+import { usageHistory } from "../controllers/usageHistoryController.js";
 import { ticketCreate } from "../controllers/ticketCreateController.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
 import { failure } from "../utils/envelope.js";
 import { badRequest } from "../utils/errors.js";
 
 /**
- * The two documented endpoints, mounted at exactly the paths in the spec:
- *   POST /account/balance_usage
- *   POST /ticket/create
+ * The documented endpoints, mounted at exactly the paths in the spec:
+ *   POST /account/balance_usage   (Branch A)
+ *   POST /account/usage_history   (Branch B)
+ *   POST /ticket/create           (shared)
  */
 const router = Router();
 
 /** Paths that must answer with the SUCCESS/FAILURE envelope, never a bare HTTP error. */
-export const SPEC_PATHS = ["/account/balance_usage", "/ticket/create"];
+export const SPEC_PATHS = [
+  "/account/balance_usage",
+  "/account/usage_history",
+  "/ticket/create",
+];
 
 export const isSpecPath = (path) => SPEC_PATHS.includes(path);
 
@@ -40,6 +46,12 @@ router.post(
   requireApiKey,
   requireJsonContentType,
   balanceUsage
+);
+router.post(
+  "/account/usage_history",
+  requireApiKey,
+  requireJsonContentType,
+  usageHistory
 );
 router.post(
   "/ticket/create",

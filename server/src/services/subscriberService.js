@@ -21,7 +21,7 @@ const isForcedError = (msisdn) =>
  * one record matches, so two stored numbers sharing a tail can never resolve
  * to the wrong account.
  */
-async function findSubscriber(msisdn) {
+export async function findSubscriber(msisdn) {
   const digits = lookupKey(msisdn);
 
   const exact = await Subscriber.findOne({ msisdn: digits }).lean();
