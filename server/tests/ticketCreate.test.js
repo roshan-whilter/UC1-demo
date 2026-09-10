@@ -5,6 +5,7 @@
 import test, { before, after, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
+import { SPEC_PATHS } from "../src/routes/specRoutes.js";
 import {
   post,
   setupDb,
@@ -164,10 +165,12 @@ test("no ticket is stored when creation fails", async () => {
 test("unknown endpoint answers with a plain HTTP 404", async () => {
   const res = await post("/ticket/created").send({});
   assert.equal(res.status, 404);
-  assert.deepEqual(res.body.endpoints, [
-    "POST /account/balance_usage",
-    "POST /account/usage_history",
-    "POST /account/plan_details",
-    "POST /ticket/create",
-  ]);
+  // Derived from SPEC_PATHS rather than hand-listed: this asserts the 404
+  // helper stays complete and correctly formatted as endpoints are added.
+  // That each path is actually routed is covered by its own endpoint tests.
+  assert.deepEqual(
+    res.body.endpoints,
+    SPEC_PATHS.map((p) => `POST ${p}`)
+  );
+  assert.ok(res.body.endpoints.length >= 5, "all spec endpoints are advertised");
 });

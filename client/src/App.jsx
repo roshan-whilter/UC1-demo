@@ -4,13 +4,16 @@ import EndpointPanel from "./components/EndpointPanel.jsx";
 import NumberPicker from "./components/NumberPicker.jsx";
 import TicketList from "./components/TicketList.jsx";
 import SubscriberList from "./components/SubscriberList.jsx";
+import RechargeLinkList from "./components/RechargeLinkList.jsx";
 import {
   callBalanceUsage,
   callUsageHistory,
   callPlanDetails,
+  callRechargeLink,
   callTicketCreate,
   fetchTickets,
   fetchSubscribers,
+  fetchRechargeLinks,
   UnauthorizedError,
 } from "./api.js";
 import { loadApiKey, saveApiKey } from "./apiKey.js";
@@ -18,12 +21,14 @@ import {
   balanceUsageRequest,
   usageHistoryRequest,
   planDetailsRequest,
+  rechargeLinkRequest,
   ticketCreateRequest,
 } from "./requests.js";
 import {
   balanceReadback,
   usageReadback,
   planReadback,
+  rechargeReadback,
   ticketReadback,
 } from "./readback.js";
 
@@ -33,13 +38,16 @@ export default function App() {
   const [balanceBody, setBalanceBody] = useState(() => balanceUsageRequest());
   const [usageBody, setUsageBody] = useState(() => usageHistoryRequest());
   const [planBody, setPlanBody] = useState(() => planDetailsRequest());
+  const [rechargeBody, setRechargeBody] = useState(() => rechargeLinkRequest());
   const [ticketBody, setTicketBody] = useState(() => ticketCreateRequest());
   const [balanceResult, setBalanceResult] = useState(null);
   const [usageResult, setUsageResult] = useState(null);
   const [planResult, setPlanResult] = useState(null);
+  const [rechargeResult, setRechargeResult] = useState(null);
   const [ticketResult, setTicketResult] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
+  const [rechargeLinks, setRechargeLinks] = useState([]);
   const [keyState, setKeyState] = useState(apiKey ? "unverified" : "missing");
   const [error, setError] = useState(null);
 
@@ -50,15 +58,18 @@ export default function App() {
       setKeyState("missing");
       setTickets([]);
       setSubscribers([]);
+      setRechargeLinks([]);
       return;
     }
     try {
-      const [ticketList, subs] = await Promise.all([
+      const [ticketList, subs, links] = await Promise.all([
         fetchTickets(),
         fetchSubscribers(),
+        fetchRechargeLinks(),
       ]);
       setTickets(ticketList);
       setSubscribers(subs.subscribers ?? []);
+      setRechargeLinks(links ?? []);
       setKeyState("valid");
       setError(null);
     } catch (err) {
@@ -66,6 +77,7 @@ export default function App() {
         setKeyState("rejected");
         setTickets([]);
         setSubscribers([]);
+        setRechargeLinks([]);
         setError("That key was rejected. Check it with whoever runs the API.");
       } else {
         setKeyState("unverified");
@@ -92,6 +104,7 @@ export default function App() {
     setBalanceBody(balanceUsageRequest(next));
     setUsageBody(usageHistoryRequest(next));
     setPlanBody(planDetailsRequest(next));
+    setRechargeBody(rechargeLinkRequest(next));
     setTicketBody(ticketCreateRequest(next));
   };
 
@@ -111,6 +124,13 @@ export default function App() {
     const result = await callPlanDetails(body);
     setPlanResult(result);
     if (result.httpStatus === 401) setKeyState("rejected");
+  };
+
+  const sendRecharge = async (body) => {
+    const result = await callRechargeLink(body);
+    setRechargeResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+    else await refreshData();
   };
 
   const sendTicket = async (body) => {
@@ -139,10 +159,10 @@ export default function App() {
           <h1>UC1 Demo Console</h1>
           <p className="app__subtitle">
             Mock telco APIs for the inbound-call demo — balance &amp; usage
-            lookup (Branch A), usage-history &amp; CDR (Branch B), plan &amp;
-            services (Branch C), then a ticket. Every response is HTTP 200; the
-            outcome is in <code>status</code>. All endpoints require an{" "}
-            <code>x-api-key</code> header.
+            UC1 balance &amp; usage (A), usage-history &amp; CDR (B), plan &amp;
+            services (C); UC2 recharge link (A); plus the shared ticket. Every
+            response is HTTP 200; the outcome is in <code>status</code>. All
+            endpoints require an <code>x-api-key</code> header.
           </p>
         </div>
       </header>
@@ -191,6 +211,16 @@ export default function App() {
         />
 
         <EndpointPanel
+          path="/recharge/send_link"
+          description="UC2 Branch A — text the caller a recharge deep-link."
+          body={rechargeBody}
+          onBodyChange={setRechargeBody}
+          onSend={sendRecharge}
+          result={rechargeResult}
+          readback={readbackFor(rechargeResult, rechargeReadback)}
+        />
+
+        <EndpointPanel
           path="/ticket/create"
           description="Shared — log the issue and read back the reference."
           body={ticketBody}
@@ -202,6 +232,7 @@ export default function App() {
       </div>
 
       <SubscriberList subscribers={subscribers} onRefresh={refreshData} />
+      <RechargeLinkList links={rechargeLinks} onRefresh={refreshData} />
       <TicketList tickets={tickets} onRefresh={refreshData} />
     </div>
   );

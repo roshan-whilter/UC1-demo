@@ -77,6 +77,44 @@ export function ticketReadback(body) {
 }
 
 /**
+ * UC2 Branch A: what the agent says after sending the recharge link.
+ *
+ * The 500 case is the important one — the gateway is down, so the agent must
+ * NOT claim an SMS is on its way. It falls back to voice-only guidance, which
+ * the spec makes this branch's designated fallback.
+ */
+export function rechargeReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    const code = body.error?.code;
+    if (code === "422") {
+      return "That amount isn't valid for a top-up, sorry. What amount would you like to add?";
+    }
+    if (code === "404") {
+      return "I'm sorry — I can't find an account on this number. Let me put you through to a colleague who can help.";
+    }
+    // 500 and anything else: no SMS went out, so don't promise one.
+    return "I wasn't able to text you the link just now, sorry. Let me walk you through it instead: you can top up in the Smart app, by dialling the USSD code, or with a scratch voucher from any Smart retailer. Would you like me to go through any of those in detail?";
+  }
+
+  const { subscriber, link } = body;
+  const parts = [`Thanks ${subscriber.name}.`];
+
+  if (link.amount === null) {
+    parts.push("I've sent a recharge link to your number by SMS.");
+  } else {
+    parts.push(
+      `I've sent a recharge link for ${spokenAmount({ amount: link.amount, currency: link.currency })} to your number by SMS.`
+    );
+  }
+
+  parts.push("It's valid for the next 24 hours.");
+  parts.push("Does that resolve your question, or is there anything else I can help with?");
+  return parts.join(" ");
+}
+
+/**
  * Branch C: what the agent says after the plan_details lookup — read back the
  * plan and active services. Detail questions about inclusions/exclusions would
  * be answered from the knowledge base, which is outside this mock.

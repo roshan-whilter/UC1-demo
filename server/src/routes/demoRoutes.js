@@ -8,6 +8,7 @@ import {
   ValidationError,
 } from "../services/subscriberService.js";
 import { listTickets } from "../services/ticketService.js";
+import { listRechargeLinks } from "../services/rechargeLinkService.js";
 import { logger } from "../utils/logger.js";
 
 /**
@@ -86,6 +87,20 @@ router.get("/tickets", async (req, res) => {
   } catch (err) {
     logger.error("demo/tickets failed", err);
     res.status(500).json({ message: "Unable to list tickets" });
+  }
+});
+
+router.get("/recharge_links", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit || 20);
+    res.status(200).json({
+      rechargeLinks: await listRechargeLinks(
+        Number.isFinite(limit) ? limit : 20
+      ),
+    });
+  } catch (err) {
+    logger.error("demo/recharge_links failed", err);
+    res.status(500).json({ message: "Unable to list recharge links" });
   }
 });
 

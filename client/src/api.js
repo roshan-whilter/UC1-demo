@@ -44,6 +44,9 @@ export const callUsageHistory = (rawBody) =>
 export const callPlanDetails = (rawBody) =>
   postJson("/account/plan_details", rawBody);
 
+export const callRechargeLink = (rawBody) =>
+  postJson("/recharge/send_link", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */
@@ -64,3 +67,6 @@ async function getJson(path) {
 export const fetchTickets = async () => (await getJson("/demo/tickets?limit=20")).tickets;
 
 export const fetchSubscribers = () => getJson("/demo/subscribers");
+
+export const fetchRechargeLinks = async () =>
+  (await getJson("/demo/recharge_links?limit=20")).rechargeLinks;

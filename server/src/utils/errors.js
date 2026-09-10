@@ -18,9 +18,13 @@ export const badRequest = (detail) =>
 /** `404 subscriber not found` — message text fixed by the spec. */
 export const notFound = () => new AppError("404", "Subscriber not found");
 
-/** `422 window out of range` — Branch B usage_history date window. */
+/** `422 window out of range` — UC1 Branch B usage_history date window. */
 export const windowOutOfRange = (detail) =>
   new AppError("422", `Window out of range: ${detail}`);
+
+/** `422 invalid amount` — UC2 Branch A recharge amount. */
+export const invalidAmount = (detail) =>
+  new AppError("422", `Invalid amount: ${detail}`);
 
 /** `500 internal error` */
 export const internal = (message = "Internal error") =>

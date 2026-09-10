@@ -40,4 +40,17 @@ export const config = {
   forcePlanErrorMsisdns: list(
     process.env.FORCE_PLAN_ERROR_MSISDNS ?? "85510999500"
   ),
+  // UC2 Branch A: msisdns that force the send_link 500 branch (gateway down).
+  forceRechargeErrorMsisdns: list(
+    process.env.FORCE_RECHARGE_ERROR_MSISDNS ?? "85510999500"
+  ),
+
+  // UC2 Branch A — recharge deep-link. The real link format is an open item;
+  // this is a plausible placeholder, swappable without a code change.
+  rechargeLinkBaseUrl:
+    process.env.RECHARGE_LINK_BASE_URL || "https://smart.com.kh/recharge",
+  // How long a sent link stays valid.
+  rechargeLinkTtlHours: Number(process.env.RECHARGE_LINK_TTL_HOURS || 24),
+  // Top-up ceiling for the 422. Axiata's real limit is still to be confirmed.
+  maxTopUpAmount: Number(process.env.MAX_TOPUP_AMOUNT || 100),
 };

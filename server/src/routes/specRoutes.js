@@ -2,6 +2,7 @@ import { Router } from "express";
 import { balanceUsage } from "../controllers/balanceUsageController.js";
 import { usageHistory } from "../controllers/usageHistoryController.js";
 import { planDetails } from "../controllers/planDetailsController.js";
+import { rechargeSendLink } from "../controllers/rechargeLinkController.js";
 import { ticketCreate } from "../controllers/ticketCreateController.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
 import { failure } from "../utils/envelope.js";
@@ -11,7 +12,8 @@ import { badRequest } from "../utils/errors.js";
  * The documented endpoints, mounted at exactly the paths in the spec:
  *   POST /account/balance_usage   (Branch A)
  *   POST /account/usage_history   (Branch B)
- *   POST /account/plan_details    (Branch C)
+ *   POST /account/plan_details    (UC1 Branch C)
+ *   POST /recharge/send_link      (UC2 Branch A)
  *   POST /ticket/create           (shared)
  */
 const router = Router();
@@ -21,6 +23,7 @@ export const SPEC_PATHS = [
   "/account/balance_usage",
   "/account/usage_history",
   "/account/plan_details",
+  "/recharge/send_link",
   "/ticket/create",
 ];
 
@@ -61,6 +64,12 @@ router.post(
   requireApiKey,
   requireJsonContentType,
   planDetails
+);
+router.post(
+  "/recharge/send_link",
+  requireApiKey,
+  requireJsonContentType,
+  rechargeSendLink
 );
 router.post(
   "/ticket/create",

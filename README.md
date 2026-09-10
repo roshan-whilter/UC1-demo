@@ -1,6 +1,8 @@
 # UC1 Demo Mock API
 
-MERN implementation of the two endpoints in `UC1-DEMO-MOCK-APIS.md`. Standalone —
+MERN implementation of the mock telco APIs for the inbound-call demo — UC1
+(Balance & Data Usage Check, three branches) and UC2 (Recharge & Top-up
+Assistance). Standalone —
 it shares nothing with the other repos in this folder except the local MongoDB
 from `infra-compose.yml`.
 
@@ -30,7 +32,7 @@ Then open <http://localhost:4200>.
 
 ```bash
 npm start             # API only, no console
-npm test              # 34 contract tests
+npm test              # 147 contract tests
 npm run seed -- --reset   # also wipes tickets and the ticketId counters
 ```
 
@@ -100,17 +102,22 @@ Mounted at exactly the paths in the spec — no `/api/v1` prefix. All require
 |---|----------|--------|---------|
 | 1 | `POST /account/balance_usage` | A | Read balance + data usage |
 | 2 | `POST /account/usage_history` | B | Usage history + CDR for the last month, with the cause of a deduction |
-| 3 | `POST /account/plan_details` | C | Active plan (with inclusions) + active service / VAS list |
-| 4 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
+| 3 | `POST /account/plan_details` | UC1 C | Active plan (with inclusions) + active service / VAS list |
+| 4 | `POST /recharge/send_link` | UC2 A | Text the caller a recharge deep-link |
+| 5 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
 
-The three lookups are one per branch of the use case; `/ticket/create` is shared
-by all three and differs only in the `type` and `category` values sent:
+Endpoints 1–3 are one lookup per branch of UC1. Endpoint 4 is UC2's first
+branch and the only **action** endpoint — it has a real-world side effect (an
+SMS), though the mock records the send rather than calling a gateway.
+`/ticket/create` is shared by every branch and differs only in the `type` and
+`category` values sent:
 
 | Branch | `type` | `category` |
 |--------|--------|------------|
-| A | `COMPLAINT` | `BALANCE_USAGE` |
-| B | `COMPLAINT` | `NEW_COMPLAINT` |
-| C | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
+| UC1 A | `COMPLAINT` | `BALANCE_USAGE` |
+| UC1 B | `COMPLAINT` | `NEW_COMPLAINT` |
+| UC1 C | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
+| UC2 A | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
 
 All follow the spec's convention:
 
@@ -122,7 +129,7 @@ All follow the spec's convention:
 - `timestamp` is `yyyyMMddHHmmss`, generated at response time. `expiry` is `yyyyMMdd`.
 - `requestId` is echoed back. On failure, so is `msisdn`.
 
-### 1. Balance & usage
+### 1. Balance & usage  (UC1 Branch A)
 
 ```bash
 curl -X POST http://localhost:4000/account/balance_usage \
@@ -150,7 +157,47 @@ curl -X POST http://localhost:4000/account/balance_usage \
 
 Failure codes: `400` malformed request · `404` subscriber not found · `500` internal error.
 
-### 2. Create ticket
+### 3. Send a recharge link  (UC2 Branch A)
+
+The one **action** endpoint: it sends the caller an SMS with a recharge
+deep-link. `amount` is optional — omit it for a generic link.
+
+```bash
+curl -X POST http://localhost:4000/recharge/send_link \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"requestId":"req-rcg-001","timestamp":"20260910120000","msisdn":"85510234567","amount":5.00}'
+```
+
+```json
+{
+  "status": "SUCCESS",
+  "error": {},
+  "requestId": "req-rcg-001",
+  "timestamp": "20260910120001",
+  "subscriber": { "msisdn": "85510234567", "name": "Sok Dara", "type": "PREPAID" },
+  "message": {
+    "messageId": "SMS-20260910-0001", "channel": "SMS", "to": "85510234567",
+    "status": "SENT", "sentAt": "20260910120001", "resendCount": 0
+  },
+  "link": {
+    "reference": "RCG-20260910-0001",
+    "url": "https://smart.com.kh/recharge?ref=RCG-20260910-0001&amount=5.00",
+    "amount": 5.00, "currency": "USD", "expiresAt": "20260911120001"
+  }
+}
+```
+
+**Nothing is actually texted.** No SMS gateway is called — the mock records the
+send and returns a gateway-shaped response, so it is safe to run repeatedly
+against real numbers. Each send is listed by `GET /demo/recharge_links`.
+
+Failure codes: `400` malformed request · `404` subscriber not found ·
+`422` unusable amount (zero, negative, or over `MAX_TOPUP_AMOUNT`) ·
+`500` gateway unavailable. On a `500` the agent must fall back to voice-only
+guidance and **not** claim an SMS was sent.
+
+### 4. Create ticket
 
 ```bash
 curl -X POST http://localhost:4000/ticket/create \
@@ -260,7 +307,7 @@ starts.
 | | |
 |---|---|
 | **Console** | `http://localhost:4000/` — the full UI, key bar and Send buttons |
-| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/ticket/create` |
+| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/recharge/send_link`, `/ticket/create` |
 | Mongo | bundled, data in the `mongo-data` volume |
 | Health | `GET /demo/health` |
 
@@ -372,6 +419,7 @@ endpoints.
 | `GET /demo/subscribers` | **required** | list the stored subscribers |
 | `POST /demo/subscribers` | **required** | add a subscriber to a running instance |
 | `GET /demo/tickets?limit=20` | **required** | recent tickets |
+| `GET /demo/recharge_links?limit=20` | **required** | recharge links sent (console panel) |
 
 Everything but health needs a key: these return and accept customer-shaped
 records, so leaving them open would undo the point of protecting the endpoints
