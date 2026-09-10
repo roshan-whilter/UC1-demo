@@ -77,6 +77,49 @@ export function ticketReadback(body) {
 }
 
 /**
+ * Branch C: what the agent says after the plan_details lookup — read back the
+ * plan and active services. Detail questions about inclusions/exclusions would
+ * be answered from the knowledge base, which is outside this mock.
+ */
+export function planReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    return "I'm sorry — I can't pull your plan details up right now. Let me put you through to a colleague who can help.";
+  }
+
+  const { subscriber, plan, services } = body;
+  const parts = [`Hello ${subscriber.name}.`];
+
+  if (!plan) {
+    parts.push(
+      "You don't have an active plan on this number at the moment — you're on pay-as-you-go."
+    );
+  } else {
+    parts.push(
+      `You're on ${plan.name}, at ${spokenAmount(plan.price)} a month, renewing on ${spokenDate(plan.renewsOn)}.`
+    );
+    parts.push(
+      `It includes ${spokenData(plan.inclusions.dataMB)} of data, ${plan.inclusions.onNetMinutes} on-net and ${plan.inclusions.offNetMinutes} off-net minutes, and ${plan.inclusions.smsCount} SMS.`
+    );
+  }
+
+  if (!services || services.length === 0) {
+    parts.push("You have no add-on services active.");
+  } else {
+    const spoken = services
+      .map((s) => `${s.name} at ${spokenAmount(s.price)} a month`)
+      .join(", and ");
+    parts.push(
+      `You also have ${services.length === 1 ? "one active service" : `${services.length} active services`}: ${spoken}.`
+    );
+  }
+
+  parts.push("Does that resolve your question?");
+  return parts.join(" ");
+}
+
+/**
  * Branch B: what the agent says after the usage_history lookup, following the
  * flow — explain the cause if found, otherwise escalate to a human.
  */

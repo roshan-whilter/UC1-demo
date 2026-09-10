@@ -36,4 +36,8 @@ export const config = {
   forceUsageErrorMsisdns: list(
     process.env.FORCE_USAGE_ERROR_MSISDNS ?? "85510999500"
   ),
+  // Branch C: msisdns that force the plan_details 500 branch.
+  forcePlanErrorMsisdns: list(
+    process.env.FORCE_PLAN_ERROR_MSISDNS ?? "85510999500"
+  ),
 };

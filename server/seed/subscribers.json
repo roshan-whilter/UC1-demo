@@ -4,8 +4,16 @@
     "name": "Sok Dara",
     "type": "PREPAID",
     "balance": {
-      "main": { "amount": 2.75, "currency": "USD", "expiry": "20261005" },
-      "bonus": { "amount": 0.5, "currency": "USD", "expiry": "20260915" }
+      "main": {
+        "amount": 2.75,
+        "currency": "USD",
+        "expiry": "20261005"
+      },
+      "bonus": {
+        "amount": 0.5,
+        "currency": "USD",
+        "expiry": "20260915"
+      }
     },
     "data": {
       "allowanceMB": 10240,
@@ -22,26 +30,97 @@
       "internetUsage": {
         "totalUsedMB": 7680,
         "records": [
-          { "startedAt": "20260908011200", "endedAt": "20260908043700", "usedMB": 1850, "network": "4G", "category": "STREAMING" },
-          { "startedAt": "20260906193000", "endedAt": "20260906201500", "usedMB": 420, "network": "4G", "category": "SOCIAL" }
+          {
+            "startedAt": "20260908011200",
+            "endedAt": "20260908043700",
+            "usedMB": 1850,
+            "network": "4G",
+            "category": "STREAMING"
+          },
+          {
+            "startedAt": "20260906193000",
+            "endedAt": "20260906201500",
+            "usedMB": 420,
+            "network": "4G",
+            "category": "SOCIAL"
+          }
         ]
       },
       "vasDeductions": {
         "totalAmount": 0.75,
         "currency": "USD",
         "records": [
-          { "chargedAt": "20260905090000", "service": "CallerTune", "amount": 0.5, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" },
-          { "chargedAt": "20260901121500", "service": "NewsAlerts", "amount": 0.25, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" }
+          {
+            "chargedAt": "20260905090000",
+            "service": "CallerTune",
+            "amount": 0.5,
+            "currency": "USD",
+            "chargeType": "SUBSCRIPTION_RENEWAL",
+            "status": "CHARGED"
+          },
+          {
+            "chargedAt": "20260901121500",
+            "service": "NewsAlerts",
+            "amount": 0.25,
+            "currency": "USD",
+            "chargeType": "SUBSCRIPTION_RENEWAL",
+            "status": "CHARGED"
+          }
         ]
       }
-    }
+    },
+    "plan": {
+      "planId": "SMART-COMBO-5",
+      "name": "Smart Combo 5",
+      "price": {
+        "amount": 5.0,
+        "currency": "USD",
+        "cycle": "MONTHLY"
+      },
+      "activatedOn": "20260831",
+      "renewsOn": "20260930",
+      "inclusions": {
+        "dataMB": 10240,
+        "onNetMinutes": 300,
+        "offNetMinutes": 60,
+        "smsCount": 100
+      }
+    },
+    "services": [
+      {
+        "serviceId": "VAS-CALLERTUNE",
+        "name": "CallerTune",
+        "price": {
+          "amount": 0.5,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260705",
+        "renewsOn": "20261005"
+      },
+      {
+        "serviceId": "VAS-NEWSALERTS",
+        "name": "NewsAlerts",
+        "price": {
+          "amount": 0.25,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260801",
+        "renewsOn": "20261001"
+      }
+    ]
   },
   {
     "msisdn": "85510555111",
     "name": "Chan Sophea",
     "type": "POSTPAID",
     "balance": {
-      "main": { "amount": 12.4, "currency": "USD", "expiry": "20261130" },
+      "main": {
+        "amount": 12.4,
+        "currency": "USD",
+        "expiry": "20261130"
+      },
       "bonus": null
     },
     "data": {
@@ -59,25 +138,90 @@
       "internetUsage": {
         "totalUsedMB": 640,
         "records": [
-          { "startedAt": "20260904103000", "endedAt": "20260904110000", "usedMB": 640, "network": "5G", "category": "BROWSING" }
+          {
+            "startedAt": "20260904103000",
+            "endedAt": "20260904110000",
+            "usedMB": 640,
+            "network": "5G",
+            "category": "BROWSING"
+          }
         ]
       },
       "vasDeductions": {
         "totalAmount": 1.24,
         "currency": "USD",
         "records": [
-          { "chargedAt": "20260903080000", "service": "WeatherPlus", "amount": 0.99, "currency": "USD", "chargeType": "AUTO_RENEWAL", "status": "CHARGED" },
-          { "chargedAt": "20260901121500", "service": "NewsAlerts", "amount": 0.25, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" }
+          {
+            "chargedAt": "20260903080000",
+            "service": "WeatherPlus",
+            "amount": 0.99,
+            "currency": "USD",
+            "chargeType": "AUTO_RENEWAL",
+            "status": "CHARGED"
+          },
+          {
+            "chargedAt": "20260901121500",
+            "service": "NewsAlerts",
+            "amount": 0.25,
+            "currency": "USD",
+            "chargeType": "SUBSCRIPTION_RENEWAL",
+            "status": "CHARGED"
+          }
         ]
       }
-    }
+    },
+    "plan": {
+      "planId": "SMART-POSTPAID-20",
+      "name": "Smart Postpaid 20",
+      "price": {
+        "amount": 20.0,
+        "currency": "USD",
+        "cycle": "MONTHLY"
+      },
+      "activatedOn": "20260601",
+      "renewsOn": "20260930",
+      "inclusions": {
+        "dataMB": 51200,
+        "onNetMinutes": 1000,
+        "offNetMinutes": 300,
+        "smsCount": 500
+      }
+    },
+    "services": [
+      {
+        "serviceId": "VAS-WEATHERPLUS",
+        "name": "WeatherPlus",
+        "price": {
+          "amount": 0.99,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260703",
+        "renewsOn": "20261003"
+      },
+      {
+        "serviceId": "VAS-NEWSALERTS",
+        "name": "NewsAlerts",
+        "price": {
+          "amount": 0.25,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260801",
+        "renewsOn": "20261001"
+      }
+    ]
   },
   {
     "msisdn": "85510777222",
     "name": "Kim Veasna",
     "type": "PREPAID",
     "balance": {
-      "main": { "amount": 0, "currency": "USD", "expiry": "20260910" },
+      "main": {
+        "amount": 0,
+        "currency": "USD",
+        "expiry": "20260910"
+      },
       "bonus": null
     },
     "data": {
@@ -92,16 +236,29 @@
         "type": "NONE",
         "summary": "No usage session or VAS charge in the last month accounts for the reported deduction."
       },
-      "internetUsage": { "totalUsedMB": 0, "records": [] },
-      "vasDeductions": { "totalAmount": 0, "currency": "USD", "records": [] }
-    }
+      "internetUsage": {
+        "totalUsedMB": 0,
+        "records": []
+      },
+      "vasDeductions": {
+        "totalAmount": 0,
+        "currency": "USD",
+        "records": []
+      }
+    },
+    "plan": null,
+    "services": []
   },
   {
     "msisdn": "9654987095",
     "name": "Guneet Gandhiok",
     "type": "PREPAID",
     "balance": {
-      "main": { "amount": 5.0, "currency": "USD", "expiry": "20261005" },
+      "main": {
+        "amount": 5.0,
+        "currency": "USD",
+        "expiry": "20261005"
+      },
       "bonus": null
     },
     "data": {
@@ -119,20 +276,62 @@
       "internetUsage": {
         "totalUsedMB": 2560,
         "records": [
-          { "startedAt": "20260906224000", "endedAt": "20260906231500", "usedMB": 2100, "network": "4G", "category": "DOWNLOAD" },
-          { "startedAt": "20260903184500", "endedAt": "20260903190000", "usedMB": 460, "network": "4G", "category": "SOCIAL" }
+          {
+            "startedAt": "20260906224000",
+            "endedAt": "20260906231500",
+            "usedMB": 2100,
+            "network": "4G",
+            "category": "DOWNLOAD"
+          },
+          {
+            "startedAt": "20260903184500",
+            "endedAt": "20260903190000",
+            "usedMB": 460,
+            "network": "4G",
+            "category": "SOCIAL"
+          }
         ]
       },
-      "vasDeductions": { "totalAmount": 0, "currency": "USD", "records": [] }
-    }
+      "vasDeductions": {
+        "totalAmount": 0,
+        "currency": "USD",
+        "records": []
+      }
+    },
+    "plan": {
+      "planId": "SMART-COMBO-5",
+      "name": "Smart Combo 5",
+      "price": {
+        "amount": 5.0,
+        "currency": "USD",
+        "cycle": "MONTHLY"
+      },
+      "activatedOn": "20260901",
+      "renewsOn": "20260930",
+      "inclusions": {
+        "dataMB": 10240,
+        "onNetMinutes": 300,
+        "offNetMinutes": 60,
+        "smsCount": 100
+      }
+    },
+    "services": []
   },
   {
     "msisdn": "9870566624",
     "name": "Raghav Kumaria",
     "type": "PREPAID",
     "balance": {
-      "main": { "amount": 8.2, "currency": "USD", "expiry": "20261020" },
-      "bonus": { "amount": 1.5, "currency": "USD", "expiry": "20260925" }
+      "main": {
+        "amount": 8.2,
+        "currency": "USD",
+        "expiry": "20261020"
+      },
+      "bonus": {
+        "amount": 1.5,
+        "currency": "USD",
+        "expiry": "20260925"
+      }
     },
     "data": {
       "allowanceMB": 20480,
@@ -149,24 +348,71 @@
       "internetUsage": {
         "totalUsedMB": 1180,
         "records": [
-          { "startedAt": "20260905201000", "endedAt": "20260905213000", "usedMB": 1180, "network": "4G", "category": "STREAMING" }
+          {
+            "startedAt": "20260905201000",
+            "endedAt": "20260905213000",
+            "usedMB": 1180,
+            "network": "4G",
+            "category": "STREAMING"
+          }
         ]
       },
       "vasDeductions": {
         "totalAmount": 1.0,
         "currency": "USD",
         "records": [
-          { "chargedAt": "20260904070000", "service": "GamingPass", "amount": 1.0, "currency": "USD", "chargeType": "SUBSCRIPTION_RENEWAL", "status": "CHARGED" }
+          {
+            "chargedAt": "20260904070000",
+            "service": "GamingPass",
+            "amount": 1.0,
+            "currency": "USD",
+            "chargeType": "SUBSCRIPTION_RENEWAL",
+            "status": "CHARGED"
+          }
         ]
       }
-    }
+    },
+    "plan": {
+      "planId": "SMART-COMBO-10",
+      "name": "Smart Combo 10",
+      "price": {
+        "amount": 10.0,
+        "currency": "USD",
+        "cycle": "MONTHLY"
+      },
+      "activatedOn": "20260910",
+      "renewsOn": "20261010",
+      "inclusions": {
+        "dataMB": 20480,
+        "onNetMinutes": 600,
+        "offNetMinutes": 120,
+        "smsCount": 200
+      }
+    },
+    "services": [
+      {
+        "serviceId": "VAS-GAMINGPASS",
+        "name": "GamingPass",
+        "price": {
+          "amount": 1.0,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260704",
+        "renewsOn": "20261004"
+      }
+    ]
   },
   {
     "msisdn": "919899047146",
     "name": "Ravinder Malhotra",
     "type": "POSTPAID",
     "balance": {
-      "main": { "amount": 15.75, "currency": "USD", "expiry": "20261130" },
+      "main": {
+        "amount": 15.75,
+        "currency": "USD",
+        "expiry": "20261130"
+      },
       "bonus": null
     },
     "data": {
@@ -184,17 +430,66 @@
       "internetUsage": {
         "totalUsedMB": 3900,
         "records": [
-          { "startedAt": "20260907203000", "endedAt": "20260907234500", "usedMB": 3200, "network": "5G", "category": "STREAMING" },
-          { "startedAt": "20260905091500", "endedAt": "20260905093000", "usedMB": 700, "network": "4G", "category": "BROWSING" }
+          {
+            "startedAt": "20260907203000",
+            "endedAt": "20260907234500",
+            "usedMB": 3200,
+            "network": "5G",
+            "category": "STREAMING"
+          },
+          {
+            "startedAt": "20260905091500",
+            "endedAt": "20260905093000",
+            "usedMB": 700,
+            "network": "4G",
+            "category": "BROWSING"
+          }
         ]
       },
       "vasDeductions": {
         "totalAmount": 1.49,
         "currency": "USD",
         "records": [
-          { "chargedAt": "20260902060000", "service": "MoviesClub", "amount": 1.49, "currency": "USD", "chargeType": "AUTO_RENEWAL", "status": "CHARGED" }
+          {
+            "chargedAt": "20260902060000",
+            "service": "MoviesClub",
+            "amount": 1.49,
+            "currency": "USD",
+            "chargeType": "AUTO_RENEWAL",
+            "status": "CHARGED"
+          }
         ]
       }
-    }
+    },
+    "plan": {
+      "planId": "SMART-POSTPAID-20",
+      "name": "Smart Postpaid 20",
+      "price": {
+        "amount": 20.0,
+        "currency": "USD",
+        "cycle": "MONTHLY"
+      },
+      "activatedOn": "20260515",
+      "renewsOn": "20261015",
+      "inclusions": {
+        "dataMB": 51200,
+        "onNetMinutes": 1000,
+        "offNetMinutes": 300,
+        "smsCount": 500
+      }
+    },
+    "services": [
+      {
+        "serviceId": "VAS-MOVIESCLUB",
+        "name": "MoviesClub",
+        "price": {
+          "amount": 1.49,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260702",
+        "renewsOn": "20261002"
+      }
+    ]
   }
 ]

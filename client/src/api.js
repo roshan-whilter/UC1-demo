@@ -41,6 +41,9 @@ export const callBalanceUsage = (rawBody) =>
 export const callUsageHistory = (rawBody) =>
   postJson("/account/usage_history", rawBody);
 
+export const callPlanDetails = (rawBody) =>
+  postJson("/account/plan_details", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */

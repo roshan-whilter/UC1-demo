@@ -167,6 +167,7 @@ test("unknown endpoint answers with a plain HTTP 404", async () => {
   assert.deepEqual(res.body.endpoints, [
     "POST /account/balance_usage",
     "POST /account/usage_history",
+    "POST /account/plan_details",
     "POST /ticket/create",
   ]);
 });

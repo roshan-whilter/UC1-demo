@@ -7,6 +7,7 @@ import SubscriberList from "./components/SubscriberList.jsx";
 import {
   callBalanceUsage,
   callUsageHistory,
+  callPlanDetails,
   callTicketCreate,
   fetchTickets,
   fetchSubscribers,
@@ -16,18 +17,26 @@ import { loadApiKey, saveApiKey } from "./apiKey.js";
 import {
   balanceUsageRequest,
   usageHistoryRequest,
+  planDetailsRequest,
   ticketCreateRequest,
 } from "./requests.js";
-import { balanceReadback, usageReadback, ticketReadback } from "./readback.js";
+import {
+  balanceReadback,
+  usageReadback,
+  planReadback,
+  ticketReadback,
+} from "./readback.js";
 
 export default function App() {
   const [apiKey, setApiKey] = useState(loadApiKey);
   const [msisdn, setMsisdn] = useState("85510234567");
   const [balanceBody, setBalanceBody] = useState(() => balanceUsageRequest());
   const [usageBody, setUsageBody] = useState(() => usageHistoryRequest());
+  const [planBody, setPlanBody] = useState(() => planDetailsRequest());
   const [ticketBody, setTicketBody] = useState(() => ticketCreateRequest());
   const [balanceResult, setBalanceResult] = useState(null);
   const [usageResult, setUsageResult] = useState(null);
+  const [planResult, setPlanResult] = useState(null);
   const [ticketResult, setTicketResult] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
@@ -76,12 +85,13 @@ export default function App() {
     setError(null);
   };
 
-  // Picking a caller number rebuilds all three bodies, so the calls stay about
-  // the same subscriber the way they would in a real call.
+  // Picking a caller number rebuilds every body, so the calls stay about the
+  // same subscriber the way they would in a real call.
   const pickNumber = (next) => {
     setMsisdn(next);
     setBalanceBody(balanceUsageRequest(next));
     setUsageBody(usageHistoryRequest(next));
+    setPlanBody(planDetailsRequest(next));
     setTicketBody(ticketCreateRequest(next));
   };
 
@@ -94,6 +104,12 @@ export default function App() {
   const sendUsage = async (body) => {
     const result = await callUsageHistory(body);
     setUsageResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+  };
+
+  const sendPlan = async (body) => {
+    const result = await callPlanDetails(body);
+    setPlanResult(result);
     if (result.httpStatus === 401) setKeyState("rejected");
   };
 
@@ -123,9 +139,10 @@ export default function App() {
           <h1>UC1 Demo Console</h1>
           <p className="app__subtitle">
             Mock telco APIs for the inbound-call demo — balance &amp; usage
-            lookup (Branch A), usage-history &amp; CDR (Branch B), then a ticket.
-            Every response is HTTP 200; the outcome is in <code>status</code>.
-            All endpoints require an <code>x-api-key</code> header.
+            lookup (Branch A), usage-history &amp; CDR (Branch B), plan &amp;
+            services (Branch C), then a ticket. Every response is HTTP 200; the
+            outcome is in <code>status</code>. All endpoints require an{" "}
+            <code>x-api-key</code> header.
           </p>
         </div>
       </header>
@@ -161,6 +178,16 @@ export default function App() {
           onSend={sendUsage}
           result={usageResult}
           readback={readbackFor(usageResult, usageReadback)}
+        />
+
+        <EndpointPanel
+          path="/account/plan_details"
+          description="Branch C — when the caller asks about their plan or active services."
+          body={planBody}
+          onBodyChange={setPlanBody}
+          onSend={sendPlan}
+          result={planResult}
+          readback={readbackFor(planResult, planReadback)}
         />
 
         <EndpointPanel

@@ -41,6 +41,7 @@ export default function SubscriberList({ subscribers, onRefresh }) {
               <th>Bonus</th>
               <th>Data left</th>
               <th>Branch B</th>
+              <th>Branch C</th>
             </tr>
           </thead>
           <tbody>
@@ -64,6 +65,23 @@ export default function SubscriberList({ subscribers, onRefresh }) {
                     </span>
                   ) : (
                     <span className="muted">—</span>
+                  )}
+                </td>
+                <td>
+                  {s.plan ? (
+                    <span
+                      className="badge badge--open"
+                      title={
+                        s.services?.length
+                          ? `Active: ${s.services.map((v) => v.name).join(", ")}`
+                          : "No active services"
+                      }
+                    >
+                      {s.plan.name}
+                      {s.services?.length ? ` +${s.services.length} VAS` : ""}
+                    </span>
+                  ) : (
+                    <span className="muted">no plan</span>
                   )}
                 </td>
               </tr>

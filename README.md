@@ -91,17 +91,28 @@ node -e "console.log('uc1_'+require('node:crypto').randomBytes(32).toString('bas
 
 ---
 
-## The two endpoints
+## The endpoints
 
-Mounted at exactly the paths in the spec — no `/api/v1` prefix. Both require
+Mounted at exactly the paths in the spec — no `/api/v1` prefix. All require
 `x-api-key`.
 
-| # | Endpoint | Purpose |
-|---|----------|---------|
-| 1 | `POST /account/balance_usage` | Read balance + data usage |
-| 2 | `POST /ticket/create` | Raise a callback ticket |
+| # | Endpoint | Branch | Purpose |
+|---|----------|--------|---------|
+| 1 | `POST /account/balance_usage` | A | Read balance + data usage |
+| 2 | `POST /account/usage_history` | B | Usage history + CDR for the last month, with the cause of a deduction |
+| 3 | `POST /account/plan_details` | C | Active plan (with inclusions) + active service / VAS list |
+| 4 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
 
-Both follow the spec's convention:
+The three lookups are one per branch of the use case; `/ticket/create` is shared
+by all three and differs only in the `type` and `category` values sent:
+
+| Branch | `type` | `category` |
+|--------|--------|------------|
+| A | `COMPLAINT` | `BALANCE_USAGE` |
+| B | `COMPLAINT` | `NEW_COMPLAINT` |
+| C | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
+
+All follow the spec's convention:
 
 - **Always HTTP 200.** The outcome is `status` in the body (`SUCCESS` / `FAILURE`).
   This holds even for a body that isn't valid JSON — that comes back as HTTP 200
@@ -249,7 +260,7 @@ starts.
 | | |
 |---|---|
 | **Console** | `http://localhost:4000/` — the full UI, key bar and Send buttons |
-| API | `http://localhost:4000/account/balance_usage`, `/ticket/create` |
+| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/ticket/create` |
 | Mongo | bundled, data in the `mongo-data` volume |
 | Health | `GET /demo/health` |
 

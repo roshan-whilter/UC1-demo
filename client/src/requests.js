@@ -37,6 +37,17 @@ export const usageHistoryRequest = (msisdn = "85510234567") =>
     2
   );
 
+export const planDetailsRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-pln-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+    },
+    null,
+    2
+  );
+
 export const ticketCreateRequest = (msisdn = "85510234567") =>
   JSON.stringify(
     {
@@ -59,7 +70,7 @@ export const ticketCreateRequest = (msisdn = "85510234567") =>
 export const DEMO_NUMBERS = [
   { msisdn: "85510234567", label: "Healthy account", hint: "SUCCESS — the spec's example payload" },
   { msisdn: "85510555111", label: "POSTPAID", hint: "SUCCESS — bonus is null" },
-  { msisdn: "85510777222", label: "Empty account", hint: "SUCCESS — zero balance, data exhausted" },
+  { msisdn: "85510777222", label: "Empty account", hint: "SUCCESS — zero balance, data exhausted; Branch B no-cause; Branch C no plan" },
   { msisdn: "9654987095", label: "Guneet Gandhiok", hint: "SUCCESS — added for live-call testing" },
   { msisdn: "9870566624", label: "Raghav Kumaria", hint: "SUCCESS — has a bonus wallet" },
   { msisdn: "919899047146", label: "Ravinder Malhotra", hint: "SUCCESS — POSTPAID" },

@@ -72,6 +72,50 @@ const usageHistorySchema = new mongoose.Schema(
   { _id: false }
 );
 
+// --- Branch C: plan & service details -----------------------------------
+/** `plan.price` / `services[].price` — amount, currency, billing cycle. */
+const priceSchema = new mongoose.Schema(
+  {
+    amount: { type: Number, required: true },
+    currency: { type: String, required: true, default: "USD" },
+    cycle: { type: String, required: true, default: "MONTHLY" },
+  },
+  { _id: false }
+);
+
+/**
+ * The active plan. Optional on a subscriber — the spec allows `plan: null` for
+ * a pay-as-you-go subscriber, or one whose pack has expired.
+ */
+const planSchema = new mongoose.Schema(
+  {
+    planId: { type: String, required: true },
+    name: { type: String, required: true },
+    price: { type: priceSchema, required: true },
+    activatedOn: { type: String, required: true, match: DATE_PATTERN },
+    renewsOn: { type: String, required: true, match: DATE_PATTERN },
+    inclusions: {
+      dataMB: { type: Number, required: true },
+      onNetMinutes: { type: Number, required: true },
+      offNetMinutes: { type: Number, required: true },
+      smsCount: { type: Number, required: true },
+    },
+  },
+  { _id: false }
+);
+
+/** One currently-active VAS subscription. */
+const serviceSchema = new mongoose.Schema(
+  {
+    serviceId: { type: String, required: true },
+    name: { type: String, required: true },
+    price: { type: priceSchema, required: true },
+    activatedOn: { type: String, required: true, match: DATE_PATTERN },
+    renewsOn: { type: String, required: true, match: DATE_PATTERN },
+  },
+  { _id: false }
+);
+
 const subscriberSchema = new mongoose.Schema(
   {
     msisdn: { type: String, required: true, unique: true, index: true },
@@ -85,6 +129,10 @@ const subscriberSchema = new mongoose.Schema(
     data: { type: dataBundleSchema, required: true },
     // Branch B only. Absent for subscribers added through the demo endpoint.
     usageHistory: { type: usageHistorySchema, default: null },
+    // Branch C. `plan` may legitimately be null (nothing active); `services`
+    // defaults to an empty list.
+    plan: { type: planSchema, default: null },
+    services: { type: [serviceSchema], default: [] },
   },
   { collection: "subscribers", timestamps: true }
 );

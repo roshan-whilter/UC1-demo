@@ -9,10 +9,12 @@ import {
 } from "./validators.js";
 
 /**
- * `type` is an enum and COMPLAINT is the only member the spec names. Add further
- * members here if the real ticketing system exposes them.
+ * `type` is an enum. Branches A and B log a `COMPLAINT`; Branch C logs an
+ * `ENQUIRY`, because a resolved plan question would misrepresent itself in CSM
+ * as a complaint. Add further members here if the real ticketing system
+ * exposes them.
  */
-export const TICKET_TYPES = ["COMPLAINT"];
+export const TICKET_TYPES = ["COMPLAINT", "ENQUIRY"];
 
 /**
  * POST /ticket/create
@@ -20,8 +22,8 @@ export const TICKET_TYPES = ["COMPLAINT"];
  * | requestId      | string     | required |
  * | timestamp      | string(14) | required |
  * | msisdn         | string     | required |
- * | type           | enum       | required | COMPLAINT
- * | category       | string     | required | BALANCE_USAGE for this demo
+ * | type           | enum       | required | COMPLAINT (A, B) · ENQUIRY (C)
+ * | category       | string     | required | free text; differs per branch
  * | summary        | string     | required | agent-written
  * | callbackNumber | string     | required | defaults to msisdn
  */

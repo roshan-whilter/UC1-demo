@@ -5,7 +5,9 @@ dist/
 .DS_Store
 
 # Internal specs, workflow diagrams and runbook — kept local, not on GitHub
+UC1-PROJECT-BRIEFING.md
 UC1-DEMO-MOCK-APIS.md
 UC1-BRANCH-B-MOCK-APIS.md
+UC1-BRANCH-C-MOCK-APIS.md
 1-Balance & Data Usage Check.svg
 DEPLOYMENT.md
