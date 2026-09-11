@@ -3,6 +3,7 @@ import { balanceUsage } from "../controllers/balanceUsageController.js";
 import { usageHistory } from "../controllers/usageHistoryController.js";
 import { planDetails } from "../controllers/planDetailsController.js";
 import { rechargeSendLink } from "../controllers/rechargeLinkController.js";
+import { rechargeDetails } from "../controllers/rechargeDetailsController.js";
 import { ticketCreate } from "../controllers/ticketCreateController.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
 import { failure } from "../utils/envelope.js";
@@ -14,6 +15,7 @@ import { badRequest } from "../utils/errors.js";
  *   POST /account/usage_history   (Branch B)
  *   POST /account/plan_details    (UC1 Branch C)
  *   POST /recharge/send_link      (UC2 Branch A)
+ *   POST /recharge/details        (UC2 Branch B)
  *   POST /ticket/create           (shared)
  */
 const router = Router();
@@ -24,6 +26,7 @@ export const SPEC_PATHS = [
   "/account/usage_history",
   "/account/plan_details",
   "/recharge/send_link",
+  "/recharge/details",
   "/ticket/create",
 ];
 
@@ -70,6 +73,12 @@ router.post(
   requireApiKey,
   requireJsonContentType,
   rechargeSendLink
+);
+router.post(
+  "/recharge/details",
+  requireApiKey,
+  requireJsonContentType,
+  rechargeDetails
 );
 router.post(
   "/ticket/create",

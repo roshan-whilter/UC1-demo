@@ -32,7 +32,7 @@ Then open <http://localhost:4200>.
 
 ```bash
 npm start             # API only, no console
-npm test              # 147 contract tests
+npm test              # 184 contract tests
 npm run seed -- --reset   # also wipes tickets and the ticketId counters
 ```
 
@@ -104,7 +104,8 @@ Mounted at exactly the paths in the spec — no `/api/v1` prefix. All require
 | 2 | `POST /account/usage_history` | B | Usage history + CDR for the last month, with the cause of a deduction |
 | 3 | `POST /account/plan_details` | UC1 C | Active plan (with inclusions) + active service / VAS list |
 | 4 | `POST /recharge/send_link` | UC2 A | Text the caller a recharge deep-link |
-| 5 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
+| 5 | `POST /recharge/details` | UC2 B | Recharge history, and whether one matches the caller's claim |
+| 6 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
 
 Endpoints 1–3 are one lookup per branch of UC1. Endpoint 4 is UC2's first
 branch and the only **action** endpoint — it has a real-world side effect (an
@@ -118,6 +119,7 @@ SMS), though the mock records the send rather than calling a gateway.
 | UC1 B | `COMPLAINT` | `NEW_COMPLAINT` |
 | UC1 C | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
 | UC2 A | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
+| UC2 B | `COMPLAINT` | `NEW_COMPLAINT` |
 
 All follow the spec's convention:
 
@@ -197,7 +199,28 @@ Failure codes: `400` malformed request · `404` subscriber not found ·
 `500` gateway unavailable. On a `500` the agent must fall back to voice-only
 guidance and **not** claim an SMS was sent.
 
-### 4. Create ticket
+### 4. Recharge details  (UC2 Branch B)
+
+Checks whether a top-up the caller *claims* to have made is actually there.
+`date` and `amount` are the caller's claim, both optional.
+
+```bash
+curl -X POST http://localhost:4000/recharge/details \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"requestId":"req-rcd-001","timestamp":"20260911120000","msisdn":"85510234567","date":"20260910","amount":5.00}'
+```
+
+The pivotal field is `match.confirmed` — **true only for a matching, credited
+top-up.** `match.status` (`CREDITED` · `PENDING` · `FAILED` · `REVERSED` ·
+`NOT_FOUND`) says which situation it is, so an escalating human knows what they
+inherit. The full history comes back either way.
+
+Failure codes: `400` malformed request · `404` subscriber not found ·
+`422` claim out of range (future date, older than `RECHARGE_HISTORY_DAYS`, or a
+non-positive amount) · `500` internal error.
+
+### 5. Create ticket
 
 ```bash
 curl -X POST http://localhost:4000/ticket/create \
@@ -246,7 +269,8 @@ Seeded by `npm run seed`, chosen so both paths of the flow can be shown live.
 | `85510999500` | FAILURE `500` — forces the internal-error branch on **both** endpoints |
 
 The forced-failure numbers are env-driven, not hardcoded data — change
-`FORCE_BALANCE_ERROR_MSISDNS` / `FORCE_TICKET_ERROR_MSISDNS` in `server/.env`.
+the `FORCE_*_ERROR_MSISDNS` variables in `server/.env` — one per endpoint, so a
+single branch can be broken on demand.
 They're checked before the DB lookup, so a forced `500` beats a would-be `404`.
 
 `msisdn` matching is on digits only, so `+855 10 234 567` resolves to
@@ -307,7 +331,7 @@ starts.
 | | |
 |---|---|
 | **Console** | `http://localhost:4000/` — the full UI, key bar and Send buttons |
-| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/recharge/send_link`, `/ticket/create` |
+| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/recharge/{send_link,details}`, `/ticket/create` |
 | Mongo | bundled, data in the `mongo-data` volume |
 | Health | `GET /demo/health` |
 
@@ -511,5 +535,13 @@ curl -X POST http://<host>:4000/demo/subscribers \
 | `LOG_LEVEL` | `info` | `error` / `warn` / `info` / `debug` |
 | `TZ` | `Asia/Phnom_Penh` | timezone for `yyyyMMddHHmmss` / `yyyyMMdd` |
 | `MAX_SUMMARY_LENGTH` | `2000` | longer summaries are a `400` |
-| `FORCE_BALANCE_ERROR_MSISDNS` | `85510999500` | comma-separated |
-| `FORCE_TICKET_ERROR_MSISDNS` | `85510999500` | comma-separated |
+| `FORCE_BALANCE_ERROR_MSISDNS` | `85510999500` | comma-separated; forces UC1-A `500` |
+| `FORCE_USAGE_ERROR_MSISDNS` | `85510999500` | forces UC1-B `500` |
+| `FORCE_PLAN_ERROR_MSISDNS` | `85510999500` | forces UC1-C `500` |
+| `FORCE_RECHARGE_ERROR_MSISDNS` | `85510999500` | forces UC2-A `500` (gateway down) |
+| `FORCE_TICKET_ERROR_MSISDNS` | `85510999500` | forces the ticket `500` |
+| `RECHARGE_LINK_BASE_URL` | `https://smart.com.kh/recharge` | placeholder — real format is an open item |
+| `RECHARGE_LINK_TTL_HOURS` | `24` | how long a sent link stays valid |
+| `MAX_TOPUP_AMOUNT` | `100` | top-up ceiling; above this is a `422` |
+| `FORCE_RECHARGE_DETAILS_ERROR_MSISDNS` | `85510999500` | forces UC2-B `500` |
+| `RECHARGE_HISTORY_DAYS` | `30` | how far back UC2-B searches; older claims are a `422` |

@@ -22,6 +22,10 @@ export const notFound = () => new AppError("404", "Subscriber not found");
 export const windowOutOfRange = (detail) =>
   new AppError("422", `Window out of range: ${detail}`);
 
+/** `422 claim out of range` — UC2 Branch B recharge claim date. */
+export const claimOutOfRange = (detail) =>
+  new AppError("422", `Claim out of range: ${detail}`);
+
 /** `422 invalid amount` — UC2 Branch A recharge amount. */
 export const invalidAmount = (detail) =>
   new AppError("422", `Invalid amount: ${detail}`);

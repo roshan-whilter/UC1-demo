@@ -45,6 +45,14 @@ export const config = {
     process.env.FORCE_RECHARGE_ERROR_MSISDNS ?? "85510999500"
   ),
 
+  // UC2 Branch B: msisdns that force the recharge_details 500 branch.
+  forceRechargeDetailsErrorMsisdns: list(
+    process.env.FORCE_RECHARGE_DETAILS_ERROR_MSISDNS ?? "85510999500"
+  ),
+  // UC2 Branch B — how far back recharge history is searched. Axiata's real
+  // retention is an open item; 30 days matches UC1 Branch B's window.
+  rechargeHistoryDays: Number(process.env.RECHARGE_HISTORY_DAYS || 30),
+
   // UC2 Branch A — recharge deep-link. The real link format is an open item;
   // this is a plausible placeholder, swappable without a code change.
   rechargeLinkBaseUrl:

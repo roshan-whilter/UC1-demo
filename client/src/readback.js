@@ -77,6 +77,45 @@ export function ticketReadback(body) {
 }
 
 /**
+ * UC2 Branch B: what the agent says after checking the recharge claim.
+ *
+ * Only a CREDITED match lets the agent confirm the money arrived. Every other
+ * status escalates — and the wording differs per status, because the human
+ * picking up the transfer needs to know which situation they're inheriting.
+ */
+export function rechargeDetailsReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    const code = body.error?.code;
+    if (code === "422") {
+      return "I can only check top-ups from the last 30 days, and that date is outside it. Do you remember roughly when it was?";
+    }
+    return "I'm sorry — I can't check your top-up history right now. Let me put you through to a colleague who can look into it.";
+  }
+
+  const { subscriber, match } = body;
+
+  if (match.confirmed) {
+    return `Good news ${subscriber.name} — ${match.summary} Could you close and reopen the app to refresh it? Does that resolve your question, or is there anything else I can help with?`;
+  }
+
+  const tail =
+    "Let me put you through to a colleague who can take this further.";
+
+  switch (match.status) {
+    case "FAILED":
+      return `I'm sorry ${subscriber.name} — ${match.summary} ${tail} They can check whether you were charged.`;
+    case "PENDING":
+      return `Thanks ${subscriber.name}. ${match.summary} ${tail} They can look into the delay.`;
+    case "REVERSED":
+      return `I'm sorry ${subscriber.name} — ${match.summary} ${tail} They can explain why it was reversed.`;
+    default:
+      return `I'm sorry ${subscriber.name} — ${match.summary} ${tail}`;
+  }
+}
+
+/**
  * UC2 Branch A: what the agent says after sending the recharge link.
  *
  * The 500 case is the important one — the gateway is down, so the agent must

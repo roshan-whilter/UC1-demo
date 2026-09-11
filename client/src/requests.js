@@ -60,6 +60,19 @@ export const rechargeLinkRequest = (msisdn = "85510234567") =>
     2
   );
 
+export const rechargeDetailsRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-rcd-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+      date: nowTimestamp().slice(0, 8),
+      amount: 5.0,
+    },
+    null,
+    2
+  );
+
 export const ticketCreateRequest = (msisdn = "85510234567") =>
   JSON.stringify(
     {

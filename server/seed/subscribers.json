@@ -109,6 +109,28 @@
         "activatedOn": "20260801",
         "renewsOn": "20261001"
       }
+    ],
+    "rechargeHistory": [
+      {
+        "rechargeId": "RCH-20260910-0001",
+        "rechargedAt": "20260910142200",
+        "amount": 5.0,
+        "currency": "USD",
+        "channel": "APP",
+        "status": "CREDITED",
+        "creditedAt": "20260910142205",
+        "reference": "SMART-TXN-8891245"
+      },
+      {
+        "rechargeId": "RCH-20260903-0004",
+        "rechargedAt": "20260903091500",
+        "amount": 3.0,
+        "currency": "USD",
+        "channel": "VOUCHER",
+        "status": "CREDITED",
+        "creditedAt": "20260903091501",
+        "reference": "SMART-TXN-8813002"
+      }
     ]
   },
   {
@@ -210,6 +232,18 @@
         "activatedOn": "20260801",
         "renewsOn": "20261001"
       }
+    ],
+    "rechargeHistory": [
+      {
+        "rechargeId": "RCH-20260909-0002",
+        "rechargedAt": "20260909184000",
+        "amount": 10.0,
+        "currency": "USD",
+        "channel": "BANK",
+        "status": "FAILED",
+        "creditedAt": null,
+        "reference": "SMART-TXN-8885511"
+      }
     ]
   },
   {
@@ -247,7 +281,8 @@
       }
     },
     "plan": null,
-    "services": []
+    "services": [],
+    "rechargeHistory": []
   },
   {
     "msisdn": "9654987095",
@@ -315,7 +350,19 @@
         "smsCount": 100
       }
     },
-    "services": []
+    "services": [],
+    "rechargeHistory": [
+      {
+        "rechargeId": "RCH-20260908-0003",
+        "rechargedAt": "20260908101500",
+        "amount": 5.0,
+        "currency": "USD",
+        "channel": "USSD",
+        "status": "CREDITED",
+        "creditedAt": "20260908101517",
+        "reference": "SMART-TXN-8871900"
+      }
+    ]
   },
   {
     "msisdn": "9870566624",
@@ -400,6 +447,28 @@
         },
         "activatedOn": "20260704",
         "renewsOn": "20261004"
+      }
+    ],
+    "rechargeHistory": [
+      {
+        "rechargeId": "RCH-20260910-0007",
+        "rechargedAt": "20260910195500",
+        "amount": 10.0,
+        "currency": "USD",
+        "channel": "EWALLET",
+        "status": "PENDING",
+        "creditedAt": null,
+        "reference": "SMART-TXN-8893771"
+      },
+      {
+        "rechargeId": "RCH-20260901-0002",
+        "rechargedAt": "20260901080000",
+        "amount": 5.0,
+        "currency": "USD",
+        "channel": "RETAILER",
+        "status": "CREDITED",
+        "creditedAt": "20260901080012",
+        "reference": "SMART-TXN-8802410"
       }
     ]
   },
@@ -489,6 +558,18 @@
         },
         "activatedOn": "20260702",
         "renewsOn": "20261002"
+      }
+    ],
+    "rechargeHistory": [
+      {
+        "rechargeId": "RCH-20260907-0005",
+        "rechargedAt": "20260907163000",
+        "amount": 20.0,
+        "currency": "USD",
+        "channel": "BANK",
+        "status": "REVERSED",
+        "creditedAt": "20260907163010",
+        "reference": "SMART-TXN-8862055"
       }
     ]
   }

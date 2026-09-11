@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { DATE_PATTERN } from "../utils/timestamp.js";
+import { DATE_PATTERN, TIMESTAMP_PATTERN } from "../utils/timestamp.js";
 
 /** `balance.main` / `balance.bonus` — amount, currency, expiry (yyyyMMdd). */
 const balanceBucketSchema = new mongoose.Schema(
@@ -116,6 +116,27 @@ const serviceSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// --- UC2 Branch B: recharge history ------------------------------------
+/**
+ * One past top-up. Embedded on the subscriber (like `usageHistory`) because it
+ * is static demo data seeded per number — unlike `RechargeLink`, which has its
+ * own collection because those rows are created at runtime.
+ */
+const rechargeRecordSchema = new mongoose.Schema(
+  {
+    rechargeId: { type: String, required: true },
+    rechargedAt: { type: String, required: true, match: TIMESTAMP_PATTERN },
+    amount: { type: Number, required: true },
+    currency: { type: String, required: true, default: "USD" },
+    channel: { type: String, required: true },
+    status: { type: String, required: true },
+    // Only set when status is CREDITED — null otherwise.
+    creditedAt: { type: String, default: null },
+    reference: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const subscriberSchema = new mongoose.Schema(
   {
     msisdn: { type: String, required: true, unique: true, index: true },
@@ -133,6 +154,8 @@ const subscriberSchema = new mongoose.Schema(
     // defaults to an empty list.
     plan: { type: planSchema, default: null },
     services: { type: [serviceSchema], default: [] },
+    // UC2 Branch B. Empty for a subscriber with no top-ups on file.
+    rechargeHistory: { type: [rechargeRecordSchema], default: [] },
   },
   { collection: "subscribers", timestamps: true }
 );

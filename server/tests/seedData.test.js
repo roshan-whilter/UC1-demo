@@ -204,3 +204,52 @@ test("Kim Veasna is the 'nothing active' variant every branch relies on", () => 
   assert.equal(s.data.remainingMB, 0, "Branch A: data exhausted");
   assert.equal(s.balance.main.amount, 0, "Branch A: zero balance");
 });
+
+test("every subscriber has a coherent UC2 Branch B recharge history", () => {
+  const CHANNELS = ["APP", "USSD", "VOUCHER", "RETAILER", "BANK", "EWALLET"];
+  const STATUSES = ["CREDITED", "PENDING", "FAILED", "REVERSED"];
+
+  for (const s of subscribers) {
+    const history = s.rechargeHistory;
+    assert.ok(Array.isArray(history), `${s.msisdn} rechargeHistory must be an array`);
+
+    for (const r of history) {
+      assert.match(r.rechargedAt, TIMESTAMP, `${s.msisdn} rechargedAt`);
+      assert.ok(CHANNELS.includes(r.channel), `${s.msisdn} channel ${r.channel}`);
+      assert.ok(STATUSES.includes(r.status), `${s.msisdn} status ${r.status}`);
+      assert.ok(r.amount > 0, `${s.msisdn} amount must be positive`);
+      assert.ok(r.reference, `${s.msisdn} needs a transaction reference`);
+
+      // creditedAt is set only when money actually reached the balance.
+      if (r.status === "CREDITED" || r.status === "REVERSED") {
+        assert.match(r.creditedAt, TIMESTAMP, `${s.msisdn}/${r.rechargeId} creditedAt`);
+        assert.ok(
+          r.creditedAt >= r.rechargedAt,
+          `${s.msisdn}/${r.rechargeId}: credited no earlier than charged`
+        );
+      } else {
+        assert.equal(
+          r.creditedAt,
+          null,
+          `${s.msisdn}/${r.rechargeId}: ${r.status} must not have a creditedAt`
+        );
+      }
+    }
+  }
+});
+
+test("the seed covers every match.status UC2 Branch B can return", () => {
+  // The spec's hosting table promises all five are demonstrable. If a future
+  // seed edit drops one, the demo silently loses a path — catch it here.
+  const seen = new Set(
+    subscribers.flatMap((s) => s.rechargeHistory.map((r) => r.status))
+  );
+  for (const status of ["CREDITED", "FAILED", "PENDING", "REVERSED"]) {
+    assert.ok(seen.has(status), `no seeded recharge has status ${status}`);
+  }
+  // NOT_FOUND is demonstrated by a subscriber with no history at all.
+  assert.ok(
+    subscribers.some((s) => s.rechargeHistory.length === 0),
+    "no subscriber has an empty recharge history (the NOT_FOUND path)"
+  );
+});

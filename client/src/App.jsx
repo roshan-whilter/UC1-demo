@@ -10,6 +10,7 @@ import {
   callUsageHistory,
   callPlanDetails,
   callRechargeLink,
+  callRechargeDetails,
   callTicketCreate,
   fetchTickets,
   fetchSubscribers,
@@ -22,6 +23,7 @@ import {
   usageHistoryRequest,
   planDetailsRequest,
   rechargeLinkRequest,
+  rechargeDetailsRequest,
   ticketCreateRequest,
 } from "./requests.js";
 import {
@@ -29,6 +31,7 @@ import {
   usageReadback,
   planReadback,
   rechargeReadback,
+  rechargeDetailsReadback,
   ticketReadback,
 } from "./readback.js";
 
@@ -39,11 +42,13 @@ export default function App() {
   const [usageBody, setUsageBody] = useState(() => usageHistoryRequest());
   const [planBody, setPlanBody] = useState(() => planDetailsRequest());
   const [rechargeBody, setRechargeBody] = useState(() => rechargeLinkRequest());
+  const [rcdBody, setRcdBody] = useState(() => rechargeDetailsRequest());
   const [ticketBody, setTicketBody] = useState(() => ticketCreateRequest());
   const [balanceResult, setBalanceResult] = useState(null);
   const [usageResult, setUsageResult] = useState(null);
   const [planResult, setPlanResult] = useState(null);
   const [rechargeResult, setRechargeResult] = useState(null);
+  const [rcdResult, setRcdResult] = useState(null);
   const [ticketResult, setTicketResult] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
@@ -105,6 +110,7 @@ export default function App() {
     setUsageBody(usageHistoryRequest(next));
     setPlanBody(planDetailsRequest(next));
     setRechargeBody(rechargeLinkRequest(next));
+    setRcdBody(rechargeDetailsRequest(next));
     setTicketBody(ticketCreateRequest(next));
   };
 
@@ -131,6 +137,12 @@ export default function App() {
     setRechargeResult(result);
     if (result.httpStatus === 401) setKeyState("rejected");
     else await refreshData();
+  };
+
+  const sendRechargeDetails = async (body) => {
+    const result = await callRechargeDetails(body);
+    setRcdResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
   };
 
   const sendTicket = async (body) => {
@@ -160,9 +172,10 @@ export default function App() {
           <p className="app__subtitle">
             Mock telco APIs for the inbound-call demo — balance &amp; usage
             UC1 balance &amp; usage (A), usage-history &amp; CDR (B), plan &amp;
-            services (C); UC2 recharge link (A); plus the shared ticket. Every
-            response is HTTP 200; the outcome is in <code>status</code>. All
-            endpoints require an <code>x-api-key</code> header.
+            services (C); UC2 recharge link (A), recharge details (B); plus the
+            shared ticket. Every response is HTTP 200; the outcome is in{" "}
+            <code>status</code>. All endpoints require an{" "}
+            <code>x-api-key</code> header.
           </p>
         </div>
       </header>
@@ -218,6 +231,16 @@ export default function App() {
           onSend={sendRecharge}
           result={rechargeResult}
           readback={readbackFor(rechargeResult, rechargeReadback)}
+        />
+
+        <EndpointPanel
+          path="/recharge/details"
+          description="UC2 Branch B — when the caller says a top-up never arrived."
+          body={rcdBody}
+          onBodyChange={setRcdBody}
+          onSend={sendRechargeDetails}
+          result={rcdResult}
+          readback={readbackFor(rcdResult, rechargeDetailsReadback)}
         />
 
         <EndpointPanel

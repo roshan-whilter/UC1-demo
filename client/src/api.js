@@ -47,6 +47,9 @@ export const callPlanDetails = (rawBody) =>
 export const callRechargeLink = (rawBody) =>
   postJson("/recharge/send_link", rawBody);
 
+export const callRechargeDetails = (rawBody) =>
+  postJson("/recharge/details", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */
