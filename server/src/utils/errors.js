@@ -30,6 +30,15 @@ export const claimOutOfRange = (detail) =>
 export const invalidAmount = (detail) =>
   new AppError("422", `Invalid amount: ${detail}`);
 
+/**
+ * `422 unknown plan` — UC3 Branch A. The caller named a plan that is not this
+ * subscriber's current or previous one, or asked for a plan when they hold
+ * none. A 422 rather than a 500: the request cannot be fulfilled, but nothing
+ * is broken.
+ */
+export const unknownPlan = (detail) =>
+  new AppError("422", `Unknown plan: ${detail}`);
+
 /** `500 internal error` */
 export const internal = (message = "Internal error") =>
   new AppError("500", message);

@@ -40,6 +40,17 @@ export const config = {
   forcePlanErrorMsisdns: list(
     process.env.FORCE_PLAN_ERROR_MSISDNS ?? "85510999500"
   ),
+
+  // UC3 Branch A: msisdns that force the plan/send_details 500 branch (SMS
+  // gateway down) — the branch's designated fallback, where the agent reads the
+  // plan aloud instead of promising a text.
+  forcePlanSmsErrorMsisdns: list(
+    process.env.FORCE_PLAN_SMS_ERROR_MSISDNS ?? "85510999500"
+  ),
+  // UC3 Branch A — how many previous plans `plan_details` returns. The diagram
+  // says "Last 2 Plans", so 2 is the diagram's number, not ours; whether the
+  // real platform can return more is an open item.
+  maxPreviousPlans: Number(process.env.MAX_PREVIOUS_PLANS || 2),
   // UC2 Branch A: msisdns that force the send_link 500 branch (gateway down).
   forceRechargeErrorMsisdns: list(
     process.env.FORCE_RECHARGE_ERROR_MSISDNS ?? "85510999500"

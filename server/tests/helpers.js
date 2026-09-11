@@ -5,6 +5,7 @@ import { Subscriber } from "../src/models/Subscriber.js";
 import { Ticket } from "../src/models/Ticket.js";
 import { Counter } from "../src/models/Counter.js";
 import { RechargeLink } from "../src/models/RechargeLink.js";
+import { PlanMessage } from "../src/models/PlanMessage.js";
 
 const TEST_URI =
   process.env.MONGO_URI_TEST ||
@@ -49,6 +50,7 @@ export async function resetDb() {
     Ticket.deleteMany({}),
     Counter.deleteMany({}),
     RechargeLink.deleteMany({}),
+    PlanMessage.deleteMany({}),
   ]);
   await Subscriber.create(SPEC_SUBSCRIBER);
 }

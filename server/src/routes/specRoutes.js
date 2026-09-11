@@ -4,6 +4,7 @@ import { usageHistory } from "../controllers/usageHistoryController.js";
 import { planDetails } from "../controllers/planDetailsController.js";
 import { rechargeSendLink } from "../controllers/rechargeLinkController.js";
 import { rechargeDetails } from "../controllers/rechargeDetailsController.js";
+import { planSendDetails } from "../controllers/planSendDetailsController.js";
 import { ticketCreate } from "../controllers/ticketCreateController.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
 import { failure } from "../utils/envelope.js";
@@ -11,11 +12,12 @@ import { badRequest } from "../utils/errors.js";
 
 /**
  * The documented endpoints, mounted at exactly the paths in the spec:
- *   POST /account/balance_usage   (Branch A)
- *   POST /account/usage_history   (Branch B)
- *   POST /account/plan_details    (UC1 Branch C)
+ *   POST /account/balance_usage   (UC1 Branch A)
+ *   POST /account/usage_history   (UC1 Branch B)
+ *   POST /account/plan_details    (UC1 Branch C, extended for UC3 Branch A)
  *   POST /recharge/send_link      (UC2 Branch A)
- *   POST /recharge/details        (UC2 Branch B)
+ *   POST /recharge/details        (UC2 Branch B, reused by UC2 Branch C)
+ *   POST /plan/send_details       (UC3 Branch A)
  *   POST /ticket/create           (shared)
  */
 const router = Router();
@@ -27,6 +29,7 @@ export const SPEC_PATHS = [
   "/account/plan_details",
   "/recharge/send_link",
   "/recharge/details",
+  "/plan/send_details",
   "/ticket/create",
 ];
 
@@ -79,6 +82,12 @@ router.post(
   requireApiKey,
   requireJsonContentType,
   rechargeDetails
+);
+router.post(
+  "/plan/send_details",
+  requireApiKey,
+  requireJsonContentType,
+  planSendDetails
 );
 router.post(
   "/ticket/create",

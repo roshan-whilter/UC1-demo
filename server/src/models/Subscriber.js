@@ -116,6 +116,33 @@ const serviceSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// --- UC3 Branch A: plan history ----------------------------------------
+/**
+ * A plan the subscriber used to be on. Same shape as `planSchema` except it
+ * carries `endedOn` rather than `renewsOn` — a plan that has ended does not
+ * renew, and reusing `renewsOn` here would read fine in JSON while lying to the
+ * caller.
+ *
+ * `inclusions` is kept in full so the agent can answer the question this branch
+ * exists for: "my old plan had more data, didn't it?"
+ */
+const previousPlanSchema = new mongoose.Schema(
+  {
+    planId: { type: String, required: true },
+    name: { type: String, required: true },
+    price: { type: priceSchema, required: true },
+    activatedOn: { type: String, required: true, match: DATE_PATTERN },
+    endedOn: { type: String, required: true, match: DATE_PATTERN },
+    inclusions: {
+      dataMB: { type: Number, required: true },
+      onNetMinutes: { type: Number, required: true },
+      offNetMinutes: { type: Number, required: true },
+      smsCount: { type: Number, required: true },
+    },
+  },
+  { _id: false }
+);
+
 // --- UC2 Branch B: recharge history ------------------------------------
 /**
  * One past top-up. Embedded on the subscriber (like `usageHistory`) because it
@@ -154,6 +181,9 @@ const subscriberSchema = new mongoose.Schema(
     // defaults to an empty list.
     plan: { type: planSchema, default: null },
     services: { type: [serviceSchema], default: [] },
+    // UC3 Branch A. Empty for a subscriber who has never changed plan — a
+    // SUCCESS, not an error. Stored newest-ended first; the response caps it.
+    previousPlans: { type: [previousPlanSchema], default: [] },
     // UC2 Branch B. Empty for a subscriber with no top-ups on file.
     rechargeHistory: { type: [rechargeRecordSchema], default: [] },
   },

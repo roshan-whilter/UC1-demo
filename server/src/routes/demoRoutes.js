@@ -9,6 +9,7 @@ import {
 } from "../services/subscriberService.js";
 import { listTickets } from "../services/ticketService.js";
 import { listRechargeLinks } from "../services/rechargeLinkService.js";
+import { listPlanMessages } from "../services/planMessageService.js";
 import { logger } from "../utils/logger.js";
 
 /**
@@ -101,6 +102,20 @@ router.get("/recharge_links", async (req, res) => {
   } catch (err) {
     logger.error("demo/recharge_links failed", err);
     res.status(500).json({ message: "Unable to list recharge links" });
+  }
+});
+
+router.get("/plan_messages", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit || 20);
+    res.status(200).json({
+      planMessages: await listPlanMessages(
+        Number.isFinite(limit) ? limit : 20
+      ),
+    });
+  } catch (err) {
+    logger.error("demo/plan_messages failed", err);
+    res.status(500).json({ message: "Unable to list plan messages" });
   }
 });
 

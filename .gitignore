@@ -4,14 +4,11 @@ dist/
 *.log
 .DS_Store
 
-# Internal specs, workflow diagrams and runbook — kept local, not on GitHub
+# Internal specs, workflow diagrams and runbook — kept local, not on GitHub.
+# Patterns, not a file list, so a newly added flow or branch spec is ignored
+# by default rather than only after someone remembers to add it here.
+/*.svg
+UC*-MOCK-APIS.md
 PROJECT-BRIEFING.md
-UC1-DEMO-MOCK-APIS.md
-UC1-BRANCH-B-MOCK-APIS.md
-UC1-BRANCH-C-MOCK-APIS.md
-UC2-BRANCH-A-MOCK-APIS.md
-UC2-BRANCH-B-MOCK-APIS.md
-1-Balance & Data Usage Check.svg
-2-Recharge & Top up Assistance (1).svg
 OPEN-ITEMS-REGISTER.md
 DEPLOYMENT.md

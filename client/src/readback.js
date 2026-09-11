@@ -192,7 +192,67 @@ export function planReadback(body) {
     );
   }
 
+  // UC3 Branch A: the same endpoint now carries plan history, and the agent
+  // reads back the active OR a previous plan depending on what was asked. An
+  // empty history is not an error — there is simply nothing earlier on file.
+  const previous = body.previousPlans ?? [];
+  if (previous.length > 0) {
+    const spoken = previous
+      .map(
+        (p) =>
+          `${p.name}, which you were on until ${spokenDate(p.endedOn)} and included ${spokenData(p.inclusions.dataMB)} of data`
+      )
+      .join(", and before that ");
+    parts.push(
+      `Before this you were on ${spoken}. I can text you the details of any of these if that would help.`
+    );
+  }
+
   parts.push("Does that resolve your question?");
+  return parts.join(" ");
+}
+
+/**
+ * UC3 Branch A: what the agent says after texting the plan details.
+ *
+ * The 500 case is the one that matters — the gateway is down, so the agent must
+ * NOT claim a text is on its way. The spec makes reading the plan aloud this
+ * branch's designated fallback, so the call continues rather than escalating.
+ */
+export function planSendReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    const code = body.error?.code;
+    if (code === "422") {
+      // Two different 422s: nothing to send at all, versus a plan that isn't
+      // theirs. The caller needs a different sentence for each.
+      if (/no active plan/i.test(body.error?.message ?? "")) {
+        return "You're not on a plan at the moment — you're on pay-as-you-go, so there are no plan details to send. Would you like me to go through the plans available instead?";
+      }
+      return "I don't have that plan on your account, sorry. Let me read you the plans I do have on file, and you can tell me which one you meant.";
+    }
+    if (code === "404") {
+      return "I'm sorry — I can't find an account on this number. Let me put you through to a colleague who can help.";
+    }
+    // 500 and anything else: no SMS went out, so don't promise one.
+    return "I wasn't able to text you just now, sorry — but I can read the details out instead. Shall I go through your plan and what it includes?";
+  }
+
+  const { subscriber, content } = body;
+  const parts = [`Thanks ${subscriber.name}.`];
+
+  parts.push(
+    content.scope === "PREVIOUS"
+      ? `I've sent the details of your previous plan, ${content.planName}, to your number by SMS.`
+      : `I've sent your ${content.planName} plan details to your number by SMS.`
+  );
+
+  if (content.includesAddOns) {
+    parts.push("Your add-on services are listed in there too.");
+  }
+
+  parts.push("Does that resolve your question, or is there anything else I can help with?");
   return parts.join(" ");
 }
 

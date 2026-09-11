@@ -110,6 +110,42 @@
         "renewsOn": "20261001"
       }
     ],
+    "previousPlans": [
+      {
+        "planId": "SMART-COMBO-3",
+        "name": "Smart Combo 3",
+        "price": {
+          "amount": 3.0,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260701",
+        "endedOn": "20260830",
+        "inclusions": {
+          "dataMB": 5120,
+          "onNetMinutes": 150,
+          "offNetMinutes": 30,
+          "smsCount": 50
+        }
+      },
+      {
+        "planId": "SMART-MINI-1",
+        "name": "Smart Mini 1",
+        "price": {
+          "amount": 1.0,
+          "currency": "USD",
+          "cycle": "WEEKLY"
+        },
+        "activatedOn": "20260601",
+        "endedOn": "20260630",
+        "inclusions": {
+          "dataMB": 1024,
+          "onNetMinutes": 50,
+          "offNetMinutes": 0,
+          "smsCount": 20
+        }
+      }
+    ],
     "rechargeHistory": [
       {
         "rechargeId": "RCH-20260910-0001",
@@ -233,6 +269,25 @@
         "renewsOn": "20261001"
       }
     ],
+    "previousPlans": [
+      {
+        "planId": "SMART-POSTPAID-10",
+        "name": "Smart Postpaid 10",
+        "price": {
+          "amount": 10.0,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260401",
+        "endedOn": "20260531",
+        "inclusions": {
+          "dataMB": 20480,
+          "onNetMinutes": 500,
+          "offNetMinutes": 150,
+          "smsCount": 250
+        }
+      }
+    ],
     "rechargeHistory": [
       {
         "rechargeId": "RCH-20260909-0002",
@@ -282,6 +337,7 @@
     },
     "plan": null,
     "services": [],
+    "previousPlans": [],
     "rechargeHistory": []
   },
   {
@@ -351,6 +407,7 @@
       }
     },
     "services": [],
+    "previousPlans": [],
     "rechargeHistory": [
       {
         "rechargeId": "RCH-20260908-0003",
@@ -447,6 +504,42 @@
         },
         "activatedOn": "20260704",
         "renewsOn": "20261004"
+      }
+    ],
+    "previousPlans": [
+      {
+        "planId": "SMART-COMBO-5",
+        "name": "Smart Combo 5",
+        "price": {
+          "amount": 5.0,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260810",
+        "endedOn": "20260909",
+        "inclusions": {
+          "dataMB": 10240,
+          "onNetMinutes": 300,
+          "offNetMinutes": 60,
+          "smsCount": 100
+        }
+      },
+      {
+        "planId": "SMART-MINI-1",
+        "name": "Smart Mini 1",
+        "price": {
+          "amount": 1.0,
+          "currency": "USD",
+          "cycle": "WEEKLY"
+        },
+        "activatedOn": "20260710",
+        "endedOn": "20260809",
+        "inclusions": {
+          "dataMB": 1024,
+          "onNetMinutes": 50,
+          "offNetMinutes": 0,
+          "smsCount": 20
+        }
       }
     ],
     "rechargeHistory": [
@@ -558,6 +651,25 @@
         },
         "activatedOn": "20260702",
         "renewsOn": "20261002"
+      }
+    ],
+    "previousPlans": [
+      {
+        "planId": "SMART-POSTPAID-10",
+        "name": "Smart Postpaid 10",
+        "price": {
+          "amount": 10.0,
+          "currency": "USD",
+          "cycle": "MONTHLY"
+        },
+        "activatedOn": "20260315",
+        "endedOn": "20260514",
+        "inclusions": {
+          "dataMB": 20480,
+          "onNetMinutes": 500,
+          "offNetMinutes": 150,
+          "smsCount": 250
+        }
       }
     ],
     "rechargeHistory": [

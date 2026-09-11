@@ -1,8 +1,8 @@
 # UC1 Demo Mock API
 
 MERN implementation of the mock telco APIs for the inbound-call demo — UC1
-(Balance & Data Usage Check, three branches) and UC2 (Recharge & Top-up
-Assistance). Standalone —
+(Balance & Data Usage Check, three branches), UC2 (Recharge & Top-up
+Assistance, three branches) and UC3 (Plan and Package Upgrade). Standalone —
 it shares nothing with the other repos in this folder except the local MongoDB
 from `infra-compose.yml`.
 
@@ -32,7 +32,7 @@ Then open <http://localhost:4200>.
 
 ```bash
 npm start             # API only, no console
-npm test              # 184 contract tests
+npm test              # 231 contract tests
 npm run seed -- --reset   # also wipes tickets and the ticketId counters
 ```
 
@@ -100,16 +100,17 @@ Mounted at exactly the paths in the spec — no `/api/v1` prefix. All require
 
 | # | Endpoint | Branch | Purpose |
 |---|----------|--------|---------|
-| 1 | `POST /account/balance_usage` | A | Read balance + data usage |
-| 2 | `POST /account/usage_history` | B | Usage history + CDR for the last month, with the cause of a deduction |
-| 3 | `POST /account/plan_details` | UC1 C | Active plan (with inclusions) + active service / VAS list |
+| 1 | `POST /account/balance_usage` | UC1 A | Read balance + data usage |
+| 2 | `POST /account/usage_history` | UC1 B | Usage history + CDR for the last month, with the cause of a deduction |
+| 3 | `POST /account/plan_details` | UC1 C, UC3 A | Active plan (with inclusions) + active service / VAS list + **the last 2 plans held** |
 | 4 | `POST /recharge/send_link` | UC2 A | Text the caller a recharge deep-link |
-| 5 | `POST /recharge/details` | UC2 B | Recharge history, and whether one matches the caller's claim |
-| 6 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
+| 5 | `POST /recharge/details` | UC2 B, UC2 C | Recharge history, and whether one matches the caller's claim |
+| 6 | `POST /plan/send_details` | UC3 A | Text the caller their plan details, current or previous |
+| 7 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
 
-Endpoints 1–3 are one lookup per branch of UC1. Endpoint 4 is UC2's first
-branch and the only **action** endpoint — it has a real-world side effect (an
-SMS), though the mock records the send rather than calling a gateway.
+Endpoints 1–3 are one lookup per branch of UC1. Endpoints 4 and 6 are the two
+**action** endpoints — they have a real-world side effect (an SMS), though the
+mock records the send rather than calling a gateway.
 `/ticket/create` is shared by every branch and differs only in the `type` and
 `category` values sent:
 
@@ -120,6 +121,8 @@ SMS), though the mock records the send rather than calling a gateway.
 | UC1 C | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
 | UC2 A | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
 | UC2 B | `COMPLAINT` | `NEW_COMPLAINT` |
+| UC2 C | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
+| UC3 A | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
 
 All follow the spec's convention:
 
@@ -161,8 +164,8 @@ Failure codes: `400` malformed request · `404` subscriber not found · `500` in
 
 ### 3. Send a recharge link  (UC2 Branch A)
 
-The one **action** endpoint: it sends the caller an SMS with a recharge
-deep-link. `amount` is optional — omit it for a generic link.
+The first of the two **action** endpoints: it sends the caller an SMS with a
+recharge deep-link. `amount` is optional — omit it for a generic link.
 
 ```bash
 curl -X POST http://localhost:4000/recharge/send_link \
@@ -219,6 +222,91 @@ inherit. The full history comes back either way.
 Failure codes: `400` malformed request · `404` subscriber not found ·
 `422` claim out of range (future date, older than `RECHARGE_HISTORY_DAYS`, or a
 non-positive amount) · `500` internal error.
+
+### 6. Plan details, with history  (UC1 Branch C + UC3 Branch A)
+
+```bash
+curl -X POST http://localhost:4000/account/plan_details \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"requestId":"req-pln-001","timestamp":"20260911120000","msisdn":"85510234567"}'
+```
+
+Returns `subscriber`, `plan`, `services` — and, since UC3 Branch A,
+`previousPlans`: **the last 2 plans the subscriber held**, newest-ended first.
+
+```json
+"previousPlans": [
+  {
+    "planId": "SMART-COMBO-3",
+    "name": "Smart Combo 3",
+    "price": { "amount": 3.00, "currency": "USD", "cycle": "MONTHLY" },
+    "activatedOn": "20260701",
+    "endedOn": "20260830",
+    "inclusions": { "dataMB": 5120, "onNetMinutes": 150, "offNetMinutes": 30, "smsCount": 50 }
+  }
+]
+```
+
+`previousPlans` is **purely additive** — it is appended after `services` and no
+existing field changed, so UC1 Branch C callers can ignore it. A past plan
+carries `endedOn` where the active `plan` carries `renewsOn`: an ended plan does
+not renew. `inclusions` is kept in full so the agent can answer *"my old plan had
+more data, didn't it?"*.
+
+A subscriber who never changed plan gets `previousPlans: []` — a **SUCCESS**, not
+an error. The cap is `MAX_PREVIOUS_PLANS` (default 2, the number the workflow
+diagram specifies).
+
+Failure codes: `400` malformed request · `404` subscriber not found · `500`
+internal error. Unchanged from UC1 Branch C.
+
+### 7. Send plan details by SMS  (UC3 Branch A)
+
+The second **action** endpoint. `planId` is optional — omit it for the current
+active plan, or name one from `previousPlans` to text an old one instead.
+
+```bash
+curl -X POST http://localhost:4000/plan/send_details \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"requestId":"req-psm-001","timestamp":"20260911120000","msisdn":"85510234567"}'
+```
+
+```json
+{
+  "status": "SUCCESS",
+  "error": {},
+  "requestId": "req-psm-001",
+  "timestamp": "20260911120001",
+  "subscriber": { "msisdn": "85510234567", "name": "Sok Dara", "type": "PREPAID" },
+  "message": {
+    "messageId": "SMS-PLN-20260911-0001", "channel": "SMS", "to": "85510234567",
+    "status": "SENT", "sentAt": "20260911120001", "resendCount": 0
+  },
+  "content": {
+    "planId": "SMART-COMBO-5", "planName": "Smart Combo 5",
+    "scope": "CURRENT", "includesAddOns": true,
+    "summary": "Smart Combo 5 — 5.00 USD monthly, renews 30 Sep 2026. Includes 10 GB data, 300 on-net and 60 off-net minutes, 100 SMS. Add-ons: CallerTune 0.50 USD/mo, NewsAlerts 0.25 USD/mo."
+  }
+}
+```
+
+**Nothing is actually texted**, exactly as with the recharge link. Each send is
+listed by `GET /demo/plan_messages`.
+
+`content.scope` is `CURRENT` or `PREVIOUS`. Add-ons only ever go out with a
+current plan — no historical add-on data is held, so listing today's VAS against
+a plan the caller left months ago would be an invention. The `messageId` uses the
+`SMS-PLN-` prefix so it can never collide with `/recharge/send_link`'s series.
+
+Only plans that `/account/plan_details` actually returns are selectable, so the
+agent can never text a plan the caller was never read out.
+
+Failure codes: `400` malformed request · `404` subscriber not found ·
+`422` unknown plan — not this subscriber's current or previous plan, or they hold
+none at all · `500` gateway unavailable. On a `500` the agent must read the plan
+details aloud and **not** claim a text is coming.
 
 ### 5. Create ticket
 
@@ -331,7 +419,7 @@ starts.
 | | |
 |---|---|
 | **Console** | `http://localhost:4000/` — the full UI, key bar and Send buttons |
-| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/recharge/{send_link,details}`, `/ticket/create` |
+| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/recharge/{send_link,details}`, `/plan/send_details`, `/ticket/create` |
 | Mongo | bundled, data in the `mongo-data` volume |
 | Health | `GET /demo/health` |
 
@@ -412,7 +500,7 @@ Use it for the platform's health probe.
 server/
   server.js                     entry — connect Mongo, then listen
   src/app.js                    Express wiring, JSON-parse-error → 200 FAILURE
-  src/routes/specRoutes.js      the two documented endpoints
+  src/routes/specRoutes.js      the documented endpoints (SPEC_PATHS)
   src/routes/demoRoutes.js      /demo/* console helpers — NOT part of the spec
   src/middleware/apiKeyAuth.js  mandatory x-api-key, constant-time compare
   src/controllers/              per-endpoint request → envelope
@@ -434,7 +522,7 @@ drift endpoint to endpoint.
 
 ### `/demo/*` helpers (not in the spec)
 
-Mounted under `/demo` so they can't be confused with the two documented
+Mounted under `/demo` so they can't be confused with the documented
 endpoints.
 
 | Route | Key | Purpose |
@@ -444,6 +532,7 @@ endpoints.
 | `POST /demo/subscribers` | **required** | add a subscriber to a running instance |
 | `GET /demo/tickets?limit=20` | **required** | recent tickets |
 | `GET /demo/recharge_links?limit=20` | **required** | recharge links sent (console panel) |
+| `GET /demo/plan_messages?limit=20` | **required** | plan-detail SMSs sent (console panel) |
 
 Everything but health needs a key: these return and accept customer-shaped
 records, so leaving them open would undo the point of protecting the endpoints
@@ -545,3 +634,5 @@ curl -X POST http://<host>:4000/demo/subscribers \
 | `MAX_TOPUP_AMOUNT` | `100` | top-up ceiling; above this is a `422` |
 | `FORCE_RECHARGE_DETAILS_ERROR_MSISDNS` | `85510999500` | forces UC2-B `500` |
 | `RECHARGE_HISTORY_DAYS` | `30` | how far back UC2-B searches; older claims are a `422` |
+| `FORCE_PLAN_SMS_ERROR_MSISDNS` | `85510999500` | forces UC3-A `500` (gateway down) |
+| `MAX_PREVIOUS_PLANS` | `2` | how many previous plans `plan_details` returns |

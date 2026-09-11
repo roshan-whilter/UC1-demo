@@ -238,6 +238,91 @@ test("every subscriber has a coherent UC2 Branch B recharge history", () => {
   }
 });
 
+test("every subscriber has a coherent UC3 Branch A plan history", () => {
+  for (const s of subscribers) {
+    const history = s.previousPlans;
+    assert.ok(Array.isArray(history), `${s.msisdn} previousPlans must be an array`);
+    assert.ok(
+      history.length <= 2,
+      `${s.msisdn}: the diagram says "Last 2 Plans" — ${history.length} stored`
+    );
+
+    for (const p of history) {
+      assert.match(p.activatedOn, DATE, `${s.msisdn}/${p.planId} activatedOn`);
+      assert.match(p.endedOn, DATE, `${s.msisdn}/${p.planId} endedOn`);
+      assert.equal(
+        p.renewsOn,
+        undefined,
+        `${s.msisdn}/${p.planId}: an ended plan must not carry renewsOn`
+      );
+      assert.ok(
+        p.activatedOn < p.endedOn,
+        `${s.msisdn}/${p.planId}: ends after it starts`
+      );
+      // The whole point of keeping inclusions: "my old plan had more data,
+      // didn't it?" is unanswerable without them.
+      for (const field of [
+        "dataMB",
+        "onNetMinutes",
+        "offNetMinutes",
+        "smsCount",
+      ]) {
+        assert.equal(
+          typeof p.inclusions[field],
+          "number",
+          `${s.msisdn}/${p.planId}: inclusions.${field}`
+        );
+      }
+    }
+
+    // Newest-ended first, and no two plans held at once.
+    const ends = history.map((p) => p.endedOn);
+    assert.deepEqual(
+      ends,
+      [...ends].sort().reverse(),
+      `${s.msisdn}: previousPlans must be stored newest-ended first`
+    );
+    for (let i = 0; i + 1 < history.length; i += 1) {
+      assert.ok(
+        history[i + 1].endedOn <= history[i].activatedOn,
+        `${s.msisdn}: ${history[i + 1].planId} overlaps ${history[i].planId}`
+      );
+    }
+
+    if (history.length > 0) {
+      assert.ok(s.plan, `${s.msisdn}: has history but no current plan`);
+      assert.ok(
+        history[0].endedOn <= s.plan.activatedOn,
+        `${s.msisdn}: history overlaps the current plan`
+      );
+      // The seeded story is an upgrade path, so each plan is larger than the
+      // one it replaced. Keeps the demo's narrative coherent.
+      const chain = [s.plan, ...history];
+      for (let i = 0; i + 1 < chain.length; i += 1) {
+        assert.ok(
+          chain[i + 1].inclusions.dataMB < chain[i].inclusions.dataMB,
+          `${s.msisdn}: ${chain[i + 1].planId} is not smaller than ${chain[i].planId}`
+        );
+      }
+    }
+  }
+});
+
+test("the seed demonstrates every UC3 Branch A path", () => {
+  // The spec's hosting table promises a full history, a partial one, and none
+  // at all. If a seed edit drops one, the demo silently loses a path.
+  const counts = subscribers.map((s) => s.previousPlans.length);
+  assert.ok(counts.includes(2), "no subscriber has the full 2-plan history");
+  assert.ok(counts.includes(1), "no subscriber has a partial history");
+  assert.ok(counts.includes(0), "no subscriber has an empty history");
+
+  // And the 422 path: a subscriber with no plan has nothing to text.
+  assert.ok(
+    subscribers.some((s) => s.plan === null && s.previousPlans.length === 0),
+    "no subscriber demonstrates the send_details 422"
+  );
+});
+
 test("the seed covers every match.status UC2 Branch B can return", () => {
   // The spec's hosting table promises all five are demonstrable. If a future
   // seed edit drops one, the demo silently loses a path — catch it here.

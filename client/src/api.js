@@ -50,6 +50,9 @@ export const callRechargeLink = (rawBody) =>
 export const callRechargeDetails = (rawBody) =>
   postJson("/recharge/details", rawBody);
 
+export const callPlanSendDetails = (rawBody) =>
+  postJson("/plan/send_details", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */
@@ -73,3 +76,6 @@ export const fetchSubscribers = () => getJson("/demo/subscribers");
 
 export const fetchRechargeLinks = async () =>
   (await getJson("/demo/recharge_links?limit=20")).rechargeLinks;
+
+export const fetchPlanMessages = async () =>
+  (await getJson("/demo/plan_messages?limit=20")).planMessages;
