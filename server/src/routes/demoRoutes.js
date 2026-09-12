@@ -10,6 +10,8 @@ import {
 import { listTickets } from "../services/ticketService.js";
 import { listRechargeLinks } from "../services/rechargeLinkService.js";
 import { listPlanMessages } from "../services/planMessageService.js";
+import { listPlanChangeLinks } from "../services/planChangeLinkService.js";
+import { listNotifications } from "../services/notificationService.js";
 import { logger } from "../utils/logger.js";
 
 /**
@@ -116,6 +118,34 @@ router.get("/plan_messages", async (req, res) => {
   } catch (err) {
     logger.error("demo/plan_messages failed", err);
     res.status(500).json({ message: "Unable to list plan messages" });
+  }
+});
+
+router.get("/plan_change_links", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit || 20);
+    res.status(200).json({
+      planChangeLinks: await listPlanChangeLinks(
+        Number.isFinite(limit) ? limit : 20
+      ),
+    });
+  } catch (err) {
+    logger.error("demo/plan_change_links failed", err);
+    res.status(500).json({ message: "Unable to list plan change links" });
+  }
+});
+
+router.get("/notifications", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit || 20);
+    res.status(200).json({
+      notifications: await listNotifications(
+        Number.isFinite(limit) ? limit : 20
+      ),
+    });
+  } catch (err) {
+    logger.error("demo/notifications failed", err);
+    res.status(500).json({ message: "Unable to list notifications" });
   }
 });
 

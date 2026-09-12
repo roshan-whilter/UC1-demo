@@ -19,6 +19,7 @@ export default defineConfig({
       "/account": API,
       "/recharge": API,
       "/plan": API,
+      "/notification": API,
       "/ticket": API,
       "/demo": API,
     },

@@ -6,6 +6,8 @@ import { Ticket } from "../src/models/Ticket.js";
 import { Counter } from "../src/models/Counter.js";
 import { RechargeLink } from "../src/models/RechargeLink.js";
 import { PlanMessage } from "../src/models/PlanMessage.js";
+import { PlanChangeLink } from "../src/models/PlanChangeLink.js";
+import { Notification } from "../src/models/Notification.js";
 
 const TEST_URI =
   process.env.MONGO_URI_TEST ||
@@ -51,6 +53,8 @@ export async function resetDb() {
     Counter.deleteMany({}),
     RechargeLink.deleteMany({}),
     PlanMessage.deleteMany({}),
+    PlanChangeLink.deleteMany({}),
+    Notification.deleteMany({}),
   ]);
   await Subscriber.create(SPEC_SUBSCRIBER);
 }

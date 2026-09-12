@@ -32,7 +32,7 @@ Then open <http://localhost:4200>.
 
 ```bash
 npm start             # API only, no console
-npm test              # 231 contract tests
+npm test              # 302 contract tests
 npm run seed -- --reset   # also wipes tickets and the ticketId counters
 ```
 
@@ -104,13 +104,16 @@ Mounted at exactly the paths in the spec — no `/api/v1` prefix. All require
 | 2 | `POST /account/usage_history` | UC1 B | Usage history + CDR for the last month, with the cause of a deduction |
 | 3 | `POST /account/plan_details` | UC1 C, UC3 A | Active plan (with inclusions) + active service / VAS list + **the last 2 plans held** |
 | 4 | `POST /recharge/send_link` | UC2 A | Text the caller a recharge deep-link |
-| 5 | `POST /recharge/details` | UC2 B, UC2 C | Recharge history, and whether one matches the caller's claim |
+| 5 | `POST /recharge/details` | UC2 B, UC2 C, UC3 B | Recharge/charge history, and whether one matches the caller's claim |
 | 6 | `POST /plan/send_details` | UC3 A | Text the caller their plan details, current or previous |
-| 7 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
+| 7 | `POST /plan/recommendations` | UC3 B | A recommended plan, plus the rest of the catalog in the same call |
+| 8 | `POST /plan/send_change_link` | UC3 B | Text a deep-link to actually switch plans |
+| 9 | `POST /notification/send` | UC3 B | Push a Smart App notification — the **first non-SMS channel** |
+| 10 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
 
-Endpoints 1–3 are one lookup per branch of UC1. Endpoints 4 and 6 are the two
-**action** endpoints — they have a real-world side effect (an SMS), though the
-mock records the send rather than calling a gateway.
+Endpoints 1–3 and 7 are lookups. Endpoints 4, 6, 8 and 9 are the project's
+**action** endpoints — each has a real-world side effect (an SMS or a push),
+though the mock records the send rather than calling a gateway.
 `/ticket/create` is shared by every branch and differs only in the `type` and
 `category` values sent:
 
@@ -123,6 +126,7 @@ mock records the send rather than calling a gateway.
 | UC2 B | `COMPLAINT` | `NEW_COMPLAINT` |
 | UC2 C | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
 | UC3 A | `ENQUIRY` | `NEW_ENQUIRY_PREHANDLED` |
+| UC3 B | `COMPLAINT` | `NEW_COMPLAINT` |
 
 All follow the spec's convention:
 
@@ -223,6 +227,10 @@ Failure codes: `400` malformed request · `404` subscriber not found ·
 `422` claim out of range (future date, older than `RECHARGE_HISTORY_DAYS`, or a
 non-positive amount) · `500` internal error.
 
+**UC3 Branch B calls this same endpoint, unchanged**, to check whether the
+charge for a plan change posted — the manager confirmed this branch
+deliberately reuses UC2 Branch B's check rather than needing its own.
+
 ### 6. Plan details, with history  (UC1 Branch C + UC3 Branch A)
 
 ```bash
@@ -307,6 +315,130 @@ Failure codes: `400` malformed request · `404` subscriber not found ·
 `422` unknown plan — not this subscriber's current or previous plan, or they hold
 none at all · `500` gateway unavailable. On a `500` the agent must read the plan
 details aloud and **not** claim a text is coming.
+
+### 8. Get plan recommendations  (UC3 Branch B)
+
+A pure lookup, same shape as `/account/plan_details`.
+
+```bash
+curl -X POST http://localhost:4000/plan/recommendations \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"requestId":"req-rec-001","timestamp":"20260911120000","msisdn":"85510234567"}'
+```
+
+```json
+{
+  "status": "SUCCESS",
+  "error": {},
+  "requestId": "req-rec-001",
+  "timestamp": "20260911120001",
+  "subscriber": { "msisdn": "85510234567", "name": "Sok Dara", "type": "PREPAID" },
+  "plans": [
+    {
+      "planId": "SMART-COMBO-10", "name": "Smart Combo 10",
+      "price": { "amount": 10.00, "currency": "USD", "cycle": "MONTHLY" },
+      "inclusions": { "dataMB": 20480, "onNetMinutes": 600, "offNetMinutes": 120, "smsCount": 200 },
+      "recommended": true, "reason": "More data and minutes than your current plan"
+    },
+    {
+      "planId": "SMART-POSTPAID-10", "name": "Smart Postpaid 10",
+      "price": { "amount": 10.00, "currency": "USD", "cycle": "MONTHLY" },
+      "inclusions": { "dataMB": 20480, "onNetMinutes": 500, "offNetMinutes": 150, "smsCount": 250 },
+      "recommended": false, "reason": null
+    }
+  ]
+}
+```
+
+`plans[]` is **every catalog plan bigger than the caller's current one**, sorted
+closest-upgrade first — deliberately the full alternative list, not just the top
+pick, so "no, give me a different one" needs no second API call. Only the first
+entry is `recommended: true`. A caller already on the top plan gets `plans: []`
+— a **SUCCESS**, not an error.
+
+The catalog itself (`server/src/data/planCatalog.js`) is shared reference data,
+not per-subscriber — the same six plans for every caller, ranked by an internal
+tier. Real plan data and recommendation logic are open items with Axiata.
+
+Failure codes: `400` malformed request · `404` subscriber not found · `500`
+internal error.
+
+### 9. Send the plan-change link  (UC3 Branch B)
+
+The project's **third action** endpoint. `planId` is **required** — unlike
+`/plan/send_details` there's no default plan to fall back to.
+
+```bash
+curl -X POST http://localhost:4000/plan/send_change_link \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"requestId":"req-pch-001","timestamp":"20260911120100","msisdn":"85510234567","planId":"SMART-COMBO-10"}'
+```
+
+```json
+{
+  "status": "SUCCESS",
+  "error": {},
+  "requestId": "req-pch-001",
+  "timestamp": "20260911120101",
+  "subscriber": { "msisdn": "85510234567", "name": "Sok Dara", "type": "PREPAID" },
+  "message": {
+    "messageId": "SMS-PCH-20260911-0001", "channel": "SMS", "to": "85510234567",
+    "status": "SENT", "sentAt": "20260911120101", "resendCount": 0
+  },
+  "change": {
+    "planId": "SMART-COMBO-10", "planName": "Smart Combo 10",
+    "link": {
+      "reference": "PCH-20260911-0001",
+      "url": "https://smart.com.kh/plan-change?ref=PCH-20260911-0001&plan=SMART-COMBO-10",
+      "expiresAt": "20260912120101"
+    }
+  }
+}
+```
+
+**Nothing is actually texted.** `messageId` uses a **third distinct prefix**,
+`SMS-PCH-`, so it can never collide with UC2-A's `SMS-…` or UC3-A's `SMS-PLN-…`
+series. Each send is listed by `GET /demo/plan_change_links`.
+
+Failure codes: `400` malformed request (including a missing `planId`) ·
+`404` subscriber not found · `422` `planId` isn't a plan in the catalog ·
+`500` gateway unavailable. On a `500` the agent must **not** claim a link is coming.
+
+### 10. Send a Smart App notification  (UC3 Branch B)
+
+The project's **first non-SMS channel** — a push notification, not a text.
+Fired alongside the plan-change link, same request shape.
+
+```bash
+curl -X POST http://localhost:4000/notification/send \
+  -H "x-api-key: $UC1_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{"requestId":"req-not-001","timestamp":"20260911120100","msisdn":"85510234567","planId":"SMART-COMBO-10"}'
+```
+
+```json
+{
+  "status": "SUCCESS",
+  "error": {},
+  "requestId": "req-not-001",
+  "timestamp": "20260911120101",
+  "subscriber": { "msisdn": "85510234567", "name": "Sok Dara", "type": "PREPAID" },
+  "notification": {
+    "notificationId": "PUSH-20260911-0001", "channel": "PUSH", "status": "SENT",
+    "sentAt": "20260911120101", "title": "Plan change ready",
+    "body": "Tap to confirm your switch to Smart Combo 10."
+  }
+}
+```
+
+**Nothing is actually pushed.** Each send is listed by `GET /demo/notifications`.
+Whether Axiata's platform has real push infrastructure to wire this up to later
+is an open item — the mock demos it either way.
+
+Failure codes: `400` malformed request · `404` subscriber not found ·
+`422` `planId` isn't a plan in the catalog · `500` push service unavailable.
 
 ### 5. Create ticket
 
@@ -419,7 +551,7 @@ starts.
 | | |
 |---|---|
 | **Console** | `http://localhost:4000/` — the full UI, key bar and Send buttons |
-| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/recharge/{send_link,details}`, `/plan/send_details`, `/ticket/create` |
+| API | `http://localhost:4000/account/{balance_usage,usage_history,plan_details}`, `/recharge/{send_link,details}`, `/plan/{send_details,recommendations,send_change_link}`, `/notification/send`, `/ticket/create` |
 | Mongo | bundled, data in the `mongo-data` volume |
 | Health | `GET /demo/health` |
 
@@ -533,6 +665,8 @@ endpoints.
 | `GET /demo/tickets?limit=20` | **required** | recent tickets |
 | `GET /demo/recharge_links?limit=20` | **required** | recharge links sent (console panel) |
 | `GET /demo/plan_messages?limit=20` | **required** | plan-detail SMSs sent (console panel) |
+| `GET /demo/plan_change_links?limit=20` | **required** | plan-change links sent (console panel) |
+| `GET /demo/notifications?limit=20` | **required** | Smart App notifications sent (console panel) |
 
 Everything but health needs a key: these return and accept customer-shaped
 records, so leaving them open would undo the point of protecting the endpoints
@@ -636,3 +770,8 @@ curl -X POST http://<host>:4000/demo/subscribers \
 | `RECHARGE_HISTORY_DAYS` | `30` | how far back UC2-B searches; older claims are a `422` |
 | `FORCE_PLAN_SMS_ERROR_MSISDNS` | `85510999500` | forces UC3-A `500` (gateway down) |
 | `MAX_PREVIOUS_PLANS` | `2` | how many previous plans `plan_details` returns |
+| `FORCE_PLAN_RECOMMENDATIONS_ERROR_MSISDNS` | `85510999500` | forces UC3-B `500` |
+| `FORCE_PLAN_CHANGE_LINK_ERROR_MSISDNS` | `85510999500` | forces UC3-B `500` (gateway down) |
+| `PLAN_CHANGE_LINK_BASE_URL` | `https://smart.com.kh/plan-change` | placeholder — real format is an open item |
+| `PLAN_CHANGE_LINK_TTL_HOURS` | `24` | how long a sent plan-change link stays valid |
+| `FORCE_NOTIFICATION_ERROR_MSISDNS` | `85510999500` | forces UC3-B `500` (push service down) |

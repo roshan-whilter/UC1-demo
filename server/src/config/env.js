@@ -72,4 +72,25 @@ export const config = {
   rechargeLinkTtlHours: Number(process.env.RECHARGE_LINK_TTL_HOURS || 24),
   // Top-up ceiling for the 422. Axiata's real limit is still to be confirmed.
   maxTopUpAmount: Number(process.env.MAX_TOPUP_AMOUNT || 100),
+
+  // UC3 Branch B: msisdns that force the plan/recommendations 500 branch.
+  forcePlanRecommendationsErrorMsisdns: list(
+    process.env.FORCE_PLAN_RECOMMENDATIONS_ERROR_MSISDNS ?? "85510999500"
+  ),
+  // UC3 Branch B: msisdns that force the plan/send_change_link 500 branch
+  // (gateway down) — same fail-soft rule as every other SMS endpoint.
+  forcePlanChangeLinkErrorMsisdns: list(
+    process.env.FORCE_PLAN_CHANGE_LINK_ERROR_MSISDNS ?? "85510999500"
+  ),
+  // UC3 Branch B — plan-change deep-link. The real link format is an open
+  // item, same as UC2-A's recharge link; this is a plausible placeholder.
+  planChangeLinkBaseUrl:
+    process.env.PLAN_CHANGE_LINK_BASE_URL || "https://smart.com.kh/plan-change",
+  // How long a sent plan-change link stays valid.
+  planChangeLinkTtlHours: Number(process.env.PLAN_CHANGE_LINK_TTL_HOURS || 24),
+  // UC3 Branch B: msisdns that force the notification/send 500 branch (push
+  // service down) — the project's first non-SMS channel, same fail-soft rule.
+  forceNotificationErrorMsisdns: list(
+    process.env.FORCE_NOTIFICATION_ERROR_MSISDNS ?? "85510999500"
+  ),
 };

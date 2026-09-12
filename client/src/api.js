@@ -53,6 +53,15 @@ export const callRechargeDetails = (rawBody) =>
 export const callPlanSendDetails = (rawBody) =>
   postJson("/plan/send_details", rawBody);
 
+export const callPlanRecommendations = (rawBody) =>
+  postJson("/plan/recommendations", rawBody);
+
+export const callPlanSendChangeLink = (rawBody) =>
+  postJson("/plan/send_change_link", rawBody);
+
+export const callNotificationSend = (rawBody) =>
+  postJson("/notification/send", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */
@@ -79,3 +88,9 @@ export const fetchRechargeLinks = async () =>
 
 export const fetchPlanMessages = async () =>
   (await getJson("/demo/plan_messages?limit=20")).planMessages;
+
+export const fetchPlanChangeLinks = async () =>
+  (await getJson("/demo/plan_change_links?limit=20")).planChangeLinks;
+
+export const fetchNotifications = async () =>
+  (await getJson("/demo/notifications?limit=20")).notifications;

@@ -31,6 +31,12 @@ function spokenData(mb) {
   return `${mb} megabytes`;
 }
 
+/** MONTHLY -> "a month", WEEKLY -> "a week". Read from the plan, never assumed. */
+function spokenCycle(cycle) {
+  const map = { MONTHLY: "a month", WEEKLY: "a week", DAILY: "a day", YEARLY: "a year" };
+  return map[cycle] ?? `every ${String(cycle ?? "").toLowerCase()}`;
+}
+
 export function balanceReadback(body) {
   if (!body) return null;
 
@@ -274,4 +280,72 @@ export function usageReadback(body) {
   }
 
   return `Thanks ${subscriber.name}. I've looked into it — ${cause.summary} Does that resolve your question, or is there anything else I can help with?`;
+}
+
+/**
+ * UC3 Branch B: what the agent says after fetching recommendations. Reads the
+ * top pick; the rest of `plans[]` is there for "no, give me a different one"
+ * without a second API call — the readback doesn't need to enumerate them.
+ */
+export function planRecommendationsReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    return "I'm sorry — I can't pull up plan options right now. Let me put you through to a colleague who can help.";
+  }
+
+  const { subscriber, plans } = body;
+
+  if (plans.length === 0) {
+    return `You're already on our best available plan, ${subscriber.name}, so there's nothing bigger to move you to. Is there anything else I can help with?`;
+  }
+
+  const top = plans[0];
+  // The cycle is read from the plan itself, not assumed — SMART-MINI-1 is
+  // WEEKLY, and saying "a month" for it would misstate the billing cycle.
+  return `${subscriber.name}, I'd recommend ${top.name} at ${spokenAmount(top.price)} ${spokenCycle(top.price.cycle)} — it includes ${spokenData(top.inclusions.dataMB)} of data, ${top.inclusions.onNetMinutes} on-net and ${top.inclusions.offNetMinutes} off-net minutes, and ${top.inclusions.smsCount} SMS. Would you like to proceed with this plan, or see a different option?`;
+}
+
+/**
+ * UC3 Branch B: what the agent says after sending the plan-change link.
+ *
+ * The 500 case matters most — the gateway is down, so the agent must NOT
+ * promise a link is on its way.
+ */
+export function planChangeReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    const code = body.error?.code;
+    if (code === "422") {
+      return "That plan isn't one I can switch you to, sorry — let me check the options again with you.";
+    }
+    if (code === "404") {
+      return "I'm sorry — I can't find an account on this number. Let me put you through to a colleague who can help.";
+    }
+    return "I wasn't able to send the plan-change link just now, sorry. Let me put you through to a colleague who can complete this for you.";
+  }
+
+  const { subscriber, change } = body;
+  return `Thanks ${subscriber.name}. I've sent a link to switch you to ${change.planName} — it's in your SMS and your Smart app notifications. Once you confirm it, let's check the charge went through.`;
+}
+
+/**
+ * UC3 Branch B: what the agent says after the Smart App push notification.
+ * Fails soft the same way as every SMS endpoint — a 500 here must not be
+ * described as a notification having gone out.
+ */
+export function notificationReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    // No separate wording needed: this call always follows the SMS deep-link
+    // in the same step, so a failure here is covered by the same fallback —
+    // the plan-change link's own confirmation already told the caller what to
+    // expect, and the agent doesn't narrate the push channel separately.
+    return "I wasn't able to send the app notification just now — the SMS link still works, so let's continue with that.";
+  }
+
+  const { notification } = body;
+  return `I've also sent a notification to your Smart app: "${notification.title}".`;
 }

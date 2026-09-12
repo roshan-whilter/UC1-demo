@@ -5,6 +5,9 @@ import { planDetails } from "../controllers/planDetailsController.js";
 import { rechargeSendLink } from "../controllers/rechargeLinkController.js";
 import { rechargeDetails } from "../controllers/rechargeDetailsController.js";
 import { planSendDetails } from "../controllers/planSendDetailsController.js";
+import { planRecommendations } from "../controllers/planRecommendationsController.js";
+import { planSendChangeLink } from "../controllers/planChangeLinkController.js";
+import { notificationSend } from "../controllers/notificationController.js";
 import { ticketCreate } from "../controllers/ticketCreateController.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
 import { failure } from "../utils/envelope.js";
@@ -16,8 +19,11 @@ import { badRequest } from "../utils/errors.js";
  *   POST /account/usage_history   (UC1 Branch B)
  *   POST /account/plan_details    (UC1 Branch C, extended for UC3 Branch A)
  *   POST /recharge/send_link      (UC2 Branch A)
- *   POST /recharge/details        (UC2 Branch B, reused by UC2 Branch C)
+ *   POST /recharge/details        (UC2 Branch B, reused by UC2 Branch C and UC3 Branch B)
  *   POST /plan/send_details       (UC3 Branch A)
+ *   POST /plan/recommendations    (UC3 Branch B)
+ *   POST /plan/send_change_link   (UC3 Branch B)
+ *   POST /notification/send       (UC3 Branch B)
  *   POST /ticket/create           (shared)
  */
 const router = Router();
@@ -30,6 +36,9 @@ export const SPEC_PATHS = [
   "/recharge/send_link",
   "/recharge/details",
   "/plan/send_details",
+  "/plan/recommendations",
+  "/plan/send_change_link",
+  "/notification/send",
   "/ticket/create",
 ];
 
@@ -88,6 +97,24 @@ router.post(
   requireApiKey,
   requireJsonContentType,
   planSendDetails
+);
+router.post(
+  "/plan/recommendations",
+  requireApiKey,
+  requireJsonContentType,
+  planRecommendations
+);
+router.post(
+  "/plan/send_change_link",
+  requireApiKey,
+  requireJsonContentType,
+  planSendChangeLink
+);
+router.post(
+  "/notification/send",
+  requireApiKey,
+  requireJsonContentType,
+  notificationSend
 );
 router.post(
   "/ticket/create",

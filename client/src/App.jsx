@@ -6,6 +6,8 @@ import TicketList from "./components/TicketList.jsx";
 import SubscriberList from "./components/SubscriberList.jsx";
 import RechargeLinkList from "./components/RechargeLinkList.jsx";
 import PlanMessageList from "./components/PlanMessageList.jsx";
+import PlanChangeLinkList from "./components/PlanChangeLinkList.jsx";
+import NotificationList from "./components/NotificationList.jsx";
 import {
   callBalanceUsage,
   callUsageHistory,
@@ -13,11 +15,16 @@ import {
   callRechargeLink,
   callRechargeDetails,
   callPlanSendDetails,
+  callPlanRecommendations,
+  callPlanSendChangeLink,
+  callNotificationSend,
   callTicketCreate,
   fetchTickets,
   fetchSubscribers,
   fetchRechargeLinks,
   fetchPlanMessages,
+  fetchPlanChangeLinks,
+  fetchNotifications,
   UnauthorizedError,
 } from "./api.js";
 import { loadApiKey, saveApiKey } from "./apiKey.js";
@@ -28,6 +35,9 @@ import {
   rechargeLinkRequest,
   rechargeDetailsRequest,
   planSendDetailsRequest,
+  planRecommendationsRequest,
+  planSendChangeLinkRequest,
+  notificationSendRequest,
   ticketCreateRequest,
 } from "./requests.js";
 import {
@@ -37,6 +47,9 @@ import {
   rechargeReadback,
   rechargeDetailsReadback,
   planSendReadback,
+  planRecommendationsReadback,
+  planChangeReadback,
+  notificationReadback,
   ticketReadback,
 } from "./readback.js";
 
@@ -49,6 +62,9 @@ export default function App() {
   const [rechargeBody, setRechargeBody] = useState(() => rechargeLinkRequest());
   const [rcdBody, setRcdBody] = useState(() => rechargeDetailsRequest());
   const [planSmsBody, setPlanSmsBody] = useState(() => planSendDetailsRequest());
+  const [recBody, setRecBody] = useState(() => planRecommendationsRequest());
+  const [pchBody, setPchBody] = useState(() => planSendChangeLinkRequest());
+  const [notifBody, setNotifBody] = useState(() => notificationSendRequest());
   const [ticketBody, setTicketBody] = useState(() => ticketCreateRequest());
   const [balanceResult, setBalanceResult] = useState(null);
   const [usageResult, setUsageResult] = useState(null);
@@ -56,11 +72,16 @@ export default function App() {
   const [rechargeResult, setRechargeResult] = useState(null);
   const [rcdResult, setRcdResult] = useState(null);
   const [planSmsResult, setPlanSmsResult] = useState(null);
+  const [recResult, setRecResult] = useState(null);
+  const [pchResult, setPchResult] = useState(null);
+  const [notifResult, setNotifResult] = useState(null);
   const [ticketResult, setTicketResult] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
   const [rechargeLinks, setRechargeLinks] = useState([]);
   const [planMessages, setPlanMessages] = useState([]);
+  const [planChangeLinks, setPlanChangeLinks] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [keyState, setKeyState] = useState(apiKey ? "unverified" : "missing");
   const [error, setError] = useState(null);
 
@@ -73,19 +94,25 @@ export default function App() {
       setSubscribers([]);
       setRechargeLinks([]);
       setPlanMessages([]);
+      setPlanChangeLinks([]);
+      setNotifications([]);
       return;
     }
     try {
-      const [ticketList, subs, links, planSms] = await Promise.all([
+      const [ticketList, subs, links, planSms, pchLinks, notifs] = await Promise.all([
         fetchTickets(),
         fetchSubscribers(),
         fetchRechargeLinks(),
         fetchPlanMessages(),
+        fetchPlanChangeLinks(),
+        fetchNotifications(),
       ]);
       setTickets(ticketList);
       setSubscribers(subs.subscribers ?? []);
       setRechargeLinks(links ?? []);
       setPlanMessages(planSms ?? []);
+      setPlanChangeLinks(pchLinks ?? []);
+      setNotifications(notifs ?? []);
       setKeyState("valid");
       setError(null);
     } catch (err) {
@@ -95,6 +122,8 @@ export default function App() {
         setSubscribers([]);
         setRechargeLinks([]);
         setPlanMessages([]);
+        setPlanChangeLinks([]);
+        setNotifications([]);
         setError("That key was rejected. Check it with whoever runs the API.");
       } else {
         setKeyState("unverified");
@@ -124,6 +153,9 @@ export default function App() {
     setRechargeBody(rechargeLinkRequest(next));
     setRcdBody(rechargeDetailsRequest(next));
     setPlanSmsBody(planSendDetailsRequest(next));
+    setRecBody(planRecommendationsRequest(next));
+    setPchBody(planSendChangeLinkRequest(next));
+    setNotifBody(notificationSendRequest(next));
     setTicketBody(ticketCreateRequest(next));
   };
 
@@ -166,6 +198,28 @@ export default function App() {
     else await refreshData();
   };
 
+  const sendRecommendations = async (body) => {
+    const result = await callPlanRecommendations(body);
+    setRecResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+  };
+
+  // An action endpoint, so a success changes server state the console shows.
+  const sendPlanChangeLink = async (body) => {
+    const result = await callPlanSendChangeLink(body);
+    setPchResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+    else await refreshData();
+  };
+
+  // The project's first non-SMS channel — same action-endpoint pattern.
+  const sendNotification = async (body) => {
+    const result = await callNotificationSend(body);
+    setNotifResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+    else await refreshData();
+  };
+
   const sendTicket = async (body) => {
     const result = await callTicketCreate(body);
     setTicketResult(result);
@@ -194,8 +248,9 @@ export default function App() {
             Mock telco APIs for the inbound-call demo — UC1 balance &amp;
             usage (A), usage-history &amp; CDR (B), plan &amp; services (C);
             UC2 recharge link (A), recharge details (B); UC3 plan details with
-            history (A) and the plan-details SMS; plus the shared ticket. Every
-            response is HTTP 200; the outcome is in{" "}
+            history and the plan-details SMS (A), plan recommendations, the
+            plan-change link and the Smart App notification (B); plus the
+            shared ticket. Every response is HTTP 200; the outcome is in{" "}
             <code>status</code>. All endpoints require an{" "}
             <code>x-api-key</code> header.
           </p>
@@ -257,7 +312,7 @@ export default function App() {
 
         <EndpointPanel
           path="/recharge/details"
-          description="UC2 Branch B — when the caller says a top-up never arrived."
+          description="UC2 Branch B (and reused by UC2-C, UC3-B) — when the caller says a charge never arrived."
           body={rcdBody}
           onBodyChange={setRcdBody}
           onSend={sendRechargeDetails}
@@ -276,6 +331,36 @@ export default function App() {
         />
 
         <EndpointPanel
+          path="/plan/recommendations"
+          description="UC3 Branch B — suggest a plan; the rest of the catalog rides along for 'give me a different one'."
+          body={recBody}
+          onBodyChange={setRecBody}
+          onSend={sendRecommendations}
+          result={recResult}
+          readback={readbackFor(recResult, planRecommendationsReadback)}
+        />
+
+        <EndpointPanel
+          path="/plan/send_change_link"
+          description="UC3 Branch B — text a deep-link to switch plans. planId is required."
+          body={pchBody}
+          onBodyChange={setPchBody}
+          onSend={sendPlanChangeLink}
+          result={pchResult}
+          readback={readbackFor(pchResult, planChangeReadback)}
+        />
+
+        <EndpointPanel
+          path="/notification/send"
+          description="UC3 Branch B — the Smart App push. First non-SMS channel in the project."
+          body={notifBody}
+          onBodyChange={setNotifBody}
+          onSend={sendNotification}
+          result={notifResult}
+          readback={readbackFor(notifResult, notificationReadback)}
+        />
+
+        <EndpointPanel
           path="/ticket/create"
           description="Shared — log the issue and read back the reference."
           body={ticketBody}
@@ -289,6 +374,8 @@ export default function App() {
       <SubscriberList subscribers={subscribers} onRefresh={refreshData} />
       <RechargeLinkList links={rechargeLinks} onRefresh={refreshData} />
       <PlanMessageList messages={planMessages} onRefresh={refreshData} />
+      <PlanChangeLinkList links={planChangeLinks} onRefresh={refreshData} />
+      <NotificationList notifications={notifications} onRefresh={refreshData} />
       <TicketList tickets={tickets} onRefresh={refreshData} />
     </div>
   );
