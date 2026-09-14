@@ -93,4 +93,14 @@ export const config = {
   forceNotificationErrorMsisdns: list(
     process.env.FORCE_NOTIFICATION_ERROR_MSISDNS ?? "85510999500"
   ),
+
+  // UC4 Branch 2: msisdns that force the service/send_deactivation_link 500 branch.
+  forceServiceDeactivationErrorMsisdns: list(
+    process.env.FORCE_SERVICE_DEACTIVATION_ERROR_MSISDNS ?? "85510999500"
+  ),
+
+  // UC4 Branch 3: msisdns that force the sim/status 500 branch.
+  forceSimStatusErrorMsisdns: list(
+    process.env.FORCE_SIM_STATUS_ERROR_MSISDNS ?? "85510999500"
+  ),
 };

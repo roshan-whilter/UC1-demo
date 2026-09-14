@@ -169,6 +169,20 @@ const subscriberSchema = new mongoose.Schema(
     msisdn: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
     type: { type: String, required: true, enum: ["PREPAID", "POSTPAID"] },
+    validity: {
+      type: {
+        type: String,
+        required: true,
+        enum: ["FULL", "ONE_WAY", "TWO_WAY"],
+        default: "FULL",
+      },
+      expiryDate: {
+        type: String,
+        required: true,
+        match: DATE_PATTERN,
+        default: "00000000",
+      },
+    },
     balance: {
       main: { type: balanceBucketSchema, required: true },
       // The spec allows `bonus` to be null (subscriber has no bonus wallet).

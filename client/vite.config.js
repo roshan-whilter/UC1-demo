@@ -20,6 +20,8 @@ export default defineConfig({
       "/recharge": API,
       "/plan": API,
       "/notification": API,
+      "/service": API,
+      "/sim": API,
       "/ticket": API,
       "/demo": API,
     },

@@ -131,6 +131,31 @@ export const notificationSendRequest = (msisdn = "85510234567") =>
     2
   );
 
+/** UC4 Branch 2 — send a deactivation link for an active service. */
+export const serviceDeactivationLinkRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-dac-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+      serviceId: "VAS-CALLERTUNE",
+    },
+    null,
+    2
+  );
+
+/** UC4 Branch 3 — look up the number's current validity state. */
+export const simStatusRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-sim-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+    },
+    null,
+    2
+  );
+
 export const ticketCreateRequest = (msisdn = "85510234567") =>
   JSON.stringify(
     {

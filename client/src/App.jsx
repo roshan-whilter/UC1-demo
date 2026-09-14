@@ -18,6 +18,8 @@ import {
   callPlanRecommendations,
   callPlanSendChangeLink,
   callNotificationSend,
+  callServiceDeactivationLink,
+  callSimStatus,
   callTicketCreate,
   fetchTickets,
   fetchSubscribers,
@@ -38,6 +40,8 @@ import {
   planRecommendationsRequest,
   planSendChangeLinkRequest,
   notificationSendRequest,
+  serviceDeactivationLinkRequest,
+  simStatusRequest,
   ticketCreateRequest,
 } from "./requests.js";
 import {
@@ -50,6 +54,8 @@ import {
   planRecommendationsReadback,
   planChangeReadback,
   notificationReadback,
+  serviceDeactivationReadback,
+  simStatusReadback,
   ticketReadback,
 } from "./readback.js";
 
@@ -65,6 +71,8 @@ export default function App() {
   const [recBody, setRecBody] = useState(() => planRecommendationsRequest());
   const [pchBody, setPchBody] = useState(() => planSendChangeLinkRequest());
   const [notifBody, setNotifBody] = useState(() => notificationSendRequest());
+  const [deactivationBody, setDeactivationBody] = useState(() => serviceDeactivationLinkRequest());
+  const [simBody, setSimBody] = useState(() => simStatusRequest());
   const [ticketBody, setTicketBody] = useState(() => ticketCreateRequest());
   const [balanceResult, setBalanceResult] = useState(null);
   const [usageResult, setUsageResult] = useState(null);
@@ -75,6 +83,8 @@ export default function App() {
   const [recResult, setRecResult] = useState(null);
   const [pchResult, setPchResult] = useState(null);
   const [notifResult, setNotifResult] = useState(null);
+  const [deactivationResult, setDeactivationResult] = useState(null);
+  const [simResult, setSimResult] = useState(null);
   const [ticketResult, setTicketResult] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
@@ -156,6 +166,8 @@ export default function App() {
     setRecBody(planRecommendationsRequest(next));
     setPchBody(planSendChangeLinkRequest(next));
     setNotifBody(notificationSendRequest(next));
+    setDeactivationBody(serviceDeactivationLinkRequest(next));
+    setSimBody(simStatusRequest(next));
     setTicketBody(ticketCreateRequest(next));
   };
 
@@ -220,6 +232,19 @@ export default function App() {
     else await refreshData();
   };
 
+  const sendServiceDeactivation = async (body) => {
+    const result = await callServiceDeactivationLink(body);
+    setDeactivationResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+    else await refreshData();
+  };
+
+  const sendSimStatus = async (body) => {
+    const result = await callSimStatus(body);
+    setSimResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+  };
+
   const sendTicket = async (body) => {
     const result = await callTicketCreate(body);
     setTicketResult(result);
@@ -249,8 +274,9 @@ export default function App() {
             usage (A), usage-history &amp; CDR (B), plan &amp; services (C);
             UC2 recharge link (A), recharge details (B); UC3 plan details with
             history and the plan-details SMS (A), plan recommendations, the
-            plan-change link and the Smart App notification (B); plus the
-            shared ticket. Every response is HTTP 200; the outcome is in{" "}
+            plan-change link and the Smart App notification (B); UC4 service
+            deactivation and SIM status; plus the shared ticket. Every response
+            is HTTP 200; the outcome is in{" "}
             <code>status</code>. All endpoints require an{" "}
             <code>x-api-key</code> header.
           </p>
@@ -358,6 +384,26 @@ export default function App() {
           onSend={sendNotification}
           result={notifResult}
           readback={readbackFor(notifResult, notificationReadback)}
+        />
+
+        <EndpointPanel
+          path="/service/send_deactivation_link"
+          description="UC4 Branch 2 — text a deep-link and USSD code to deactivate an active service."
+          body={deactivationBody}
+          onBodyChange={setDeactivationBody}
+          onSend={sendServiceDeactivation}
+          result={deactivationResult}
+          readback={readbackFor(deactivationResult, serviceDeactivationReadback)}
+        />
+
+        <EndpointPanel
+          path="/sim/status"
+          description="UC4 Branch 3 — check the number's current validity state and expiry."
+          body={simBody}
+          onBodyChange={setSimBody}
+          onSend={sendSimStatus}
+          result={simResult}
+          readback={readbackFor(simResult, simStatusReadback)}
         />
 
         <EndpointPanel

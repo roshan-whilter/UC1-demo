@@ -9,6 +9,8 @@ import { planRecommendations } from "../controllers/planRecommendationsControlle
 import { planSendChangeLink } from "../controllers/planChangeLinkController.js";
 import { notificationSend } from "../controllers/notificationController.js";
 import { ticketCreate } from "../controllers/ticketCreateController.js";
+import { serviceSendDeactivationLink } from "../controllers/serviceDeactivationController.js";
+import { simStatus } from "../controllers/simStatusController.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
 import { failure } from "../utils/envelope.js";
 import { badRequest } from "../utils/errors.js";
@@ -24,6 +26,8 @@ import { badRequest } from "../utils/errors.js";
  *   POST /plan/recommendations    (UC3 Branch B)
  *   POST /plan/send_change_link   (UC3 Branch B)
  *   POST /notification/send       (UC3 Branch B)
+ *   POST /service/send_deactivation_link (UC4 Branch 2)
+ *   POST /sim/status               (UC4 Branch 3)
  *   POST /ticket/create           (shared)
  */
 const router = Router();
@@ -38,6 +42,8 @@ export const SPEC_PATHS = [
   "/plan/send_details",
   "/plan/recommendations",
   "/plan/send_change_link",
+  "/service/send_deactivation_link",
+  "/sim/status",
   "/notification/send",
   "/ticket/create",
 ];
@@ -109,6 +115,18 @@ router.post(
   requireApiKey,
   requireJsonContentType,
   planSendChangeLink
+);
+router.post(
+  "/service/send_deactivation_link",
+  requireApiKey,
+  requireJsonContentType,
+  serviceSendDeactivationLink
+);
+router.post(
+  "/sim/status",
+  requireApiKey,
+  requireJsonContentType,
+  simStatus
 );
 router.post(
   "/notification/send",

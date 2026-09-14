@@ -29,6 +29,10 @@ export const SPEC_SUBSCRIBER = {
   msisdn: "85510234567",
   name: "Sok Dara",
   type: "PREPAID",
+  validity: {
+    type: "FULL",
+    expiryDate: "20260930",
+  },
   balance: {
     main: { amount: 2.75, currency: "USD", expiry: "20261005" },
     bonus: { amount: 0.5, currency: "USD", expiry: "20260915" },
@@ -38,6 +42,70 @@ export const SPEC_SUBSCRIBER = {
     usedMB: 7680,
     remainingMB: 2560,
     expiry: "20260930",
+  },
+  plan: {
+    planId: "SMART-COMBO-5",
+    name: "Smart Combo 5",
+    price: { amount: 5.0, currency: "USD", cycle: "MONTHLY" },
+    activatedOn: "20260831",
+    renewsOn: "20260930",
+    inclusions: {
+      dataMB: 10240,
+      onNetMinutes: 300,
+      offNetMinutes: 60,
+      smsCount: 100,
+    },
+  },
+  services: [
+    {
+      serviceId: "VAS-CALLERTUNE",
+      name: "CallerTune",
+      price: { amount: 0.5, currency: "USD", cycle: "MONTHLY" },
+      activatedOn: "20260705",
+      renewsOn: "20261005",
+    },
+    {
+      serviceId: "VAS-NEWSALERTS",
+      name: "NewsAlerts",
+      price: { amount: 0.25, currency: "USD", cycle: "MONTHLY" },
+      activatedOn: "20260801",
+      renewsOn: "20261001",
+    },
+  ],
+  previousPlans: [],
+  rechargeHistory: [],
+  usageHistory: {
+    cause: {
+      identified: true,
+      type: "DATA_USAGE",
+      summary: "A 1850 MB video streaming session ran from 01:12 to 04:37 on 8 September.",
+    },
+    internetUsage: {
+      totalUsedMB: 7680,
+      records: [],
+    },
+    vasDeductions: {
+      totalAmount: 0.75,
+      currency: "USD",
+      records: [
+        {
+          chargedAt: "20260905090000",
+          service: "CallerTune",
+          amount: 0.5,
+          currency: "USD",
+          chargeType: "SUBSCRIPTION_RENEWAL",
+          status: "CHARGED",
+        },
+        {
+          chargedAt: "20260901121500",
+          service: "NewsAlerts",
+          amount: 0.25,
+          currency: "USD",
+          chargeType: "SUBSCRIPTION_RENEWAL",
+          status: "CHARGED",
+        },
+      ],
+    },
   },
 };
 

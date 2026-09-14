@@ -3,6 +3,10 @@
     "msisdn": "85510234567",
     "name": "Sok Dara",
     "type": "PREPAID",
+    "validity": {
+      "type": "FULL",
+      "expiryDate": "20260930"
+    },
     "balance": {
       "main": {
         "amount": 2.75,
@@ -173,6 +177,10 @@
     "msisdn": "85510555111",
     "name": "Chan Sophea",
     "type": "POSTPAID",
+    "validity": {
+      "type": "ONE_WAY",
+      "expiryDate": "20261015"
+    },
     "balance": {
       "main": {
         "amount": 12.4,
@@ -305,6 +313,10 @@
     "msisdn": "85510777222",
     "name": "Kim Veasna",
     "type": "PREPAID",
+    "validity": {
+      "type": "TWO_WAY",
+      "expiryDate": "20260925"
+    },
     "balance": {
       "main": {
         "amount": 0,
@@ -344,6 +356,10 @@
     "msisdn": "9654987095",
     "name": "Guneet Gandhiok",
     "type": "PREPAID",
+    "validity": {
+      "type": "FULL",
+      "expiryDate": "20260930"
+    },
     "balance": {
       "main": {
         "amount": 5.0,
@@ -425,6 +441,10 @@
     "msisdn": "9870566624",
     "name": "Raghav Kumaria",
     "type": "PREPAID",
+    "validity": {
+      "type": "FULL",
+      "expiryDate": "20261010"
+    },
     "balance": {
       "main": {
         "amount": 8.2,
@@ -569,6 +589,10 @@
     "msisdn": "919899047146",
     "name": "Ravinder Malhotra",
     "type": "POSTPAID",
+    "validity": {
+      "type": "FULL",
+      "expiryDate": "20261130"
+    },
     "balance": {
       "main": {
         "amount": 15.75,

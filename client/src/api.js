@@ -62,6 +62,11 @@ export const callPlanSendChangeLink = (rawBody) =>
 export const callNotificationSend = (rawBody) =>
   postJson("/notification/send", rawBody);
 
+export const callServiceDeactivationLink = (rawBody) =>
+  postJson("/service/send_deactivation_link", rawBody);
+
+export const callSimStatus = (rawBody) => postJson("/sim/status", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */

@@ -155,6 +155,11 @@ export async function addSubscriber(body) {
     throw new ValidationError("type must be PREPAID or POSTPAID");
   }
 
+  const validityType = body.validity?.type ?? "FULL";
+  if (!["FULL", "ONE_WAY", "TWO_WAY"].includes(validityType)) {
+    throw new ValidationError("validity.type must be FULL, ONE_WAY or TWO_WAY");
+  }
+
   const allowanceMB = positiveNumber(
     body.data?.allowanceMB,
     10240,
@@ -171,6 +176,14 @@ export async function addSubscriber(body) {
     msisdn,
     name,
     type,
+    validity: {
+      type: validityType,
+      expiryDate: yyyymmdd(
+        body.validity?.expiryDate,
+        body.data?.expiry ?? expiryIn(30),
+        "validity.expiryDate"
+      ),
+    },
     balance: {
       main: {
         amount: positiveNumber(

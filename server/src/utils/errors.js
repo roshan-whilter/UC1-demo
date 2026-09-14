@@ -39,6 +39,10 @@ export const invalidAmount = (detail) =>
 export const unknownPlan = (detail) =>
   new AppError("422", `Unknown plan: ${detail}`);
 
+/** `422 service is not active` — UC4 Branch 2. */
+export const serviceNotActive = (detail = "Service is not active") =>
+  new AppError("422", detail);
+
 /** `500 internal error` */
 export const internal = (message = "Internal error") =>
   new AppError("500", message);

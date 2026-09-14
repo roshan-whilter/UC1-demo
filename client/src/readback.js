@@ -349,3 +349,42 @@ export function notificationReadback(body) {
   const { notification } = body;
   return `I've also sent a notification to your Smart app: "${notification.title}".`;
 }
+
+/** UC4 Branch 2: confirm the deactivation SMS without claiming the service is already off. */
+export function serviceDeactivationReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    if (body.error?.code === "422") {
+      return "That service isn't active on this number, so there is nothing to deactivate.";
+    }
+    if (body.error?.code === "404") {
+      return "I'm sorry — I can't find an account on this number. Let me put you through to a colleague who can help.";
+    }
+    return "I wasn't able to text the deactivation link just now, but I can still guide you through the USSD steps.";
+  }
+
+  const { subscriber, deactivation } = body;
+  return `Thanks ${subscriber.name}. I've sent an SMS with the link to deactivate ${deactivation.serviceName}. It is valid for the next 24 hours, and the USSD code is ${deactivation.ussdCode}.`;
+}
+
+/** UC4 Branch 3: report the validity state and its expiry. */
+export function simStatusReadback(body) {
+  if (!body) return null;
+
+  if (body.status === "FAILURE") {
+    if (body.error?.code === "404") {
+      return "I'm sorry — I can't find an account on this number. Let me put you through to a colleague who can help.";
+    }
+    return "I'm sorry — I can't check the SIM status right now. Let me put you through to a colleague who can help.";
+  }
+
+  const { subscriber, validity } = body;
+  const expiry = spokenDate(validity.expiryDate);
+  const state = {
+    FULL: "fully active",
+    ONE_WAY: "in one-way validity, so incoming calls are available only",
+    TWO_WAY: "in two-way validity, so incoming and outgoing calls are restricted",
+  }[validity.type] ?? validity.type;
+  return `${subscriber.name}, your number is ${state}. This validity state expires on ${expiry}.`;
+}
