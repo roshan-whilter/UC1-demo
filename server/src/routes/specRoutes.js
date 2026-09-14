@@ -11,6 +11,9 @@ import { notificationSend } from "../controllers/notificationController.js";
 import { ticketCreate } from "../controllers/ticketCreateController.js";
 import { serviceSendDeactivationLink } from "../controllers/serviceDeactivationController.js";
 import { simStatus } from "../controllers/simStatusController.js";
+import { incidentStatus } from "../controllers/incidentStatusController.js";
+import { complaintHistory } from "../controllers/complaintHistoryController.js";
+import { troubleshootingLinkSend } from "../controllers/troubleshootingLinkController.js";
 import { requireApiKey } from "../middleware/apiKeyAuth.js";
 import { failure } from "../utils/envelope.js";
 import { badRequest } from "../utils/errors.js";
@@ -28,6 +31,9 @@ import { badRequest } from "../utils/errors.js";
  *   POST /notification/send       (UC3 Branch B)
  *   POST /service/send_deactivation_link (UC4 Branch 2)
  *   POST /sim/status               (UC4 Branch 3)
+ *   POST /incident/my_status       (UC5 Branch 1)
+ *   POST /complaint/history        (UC5 Branch 3)
+ *   POST /outage/send_troubleshooting_link (UC5 Branch 2)
  *   POST /ticket/create           (shared)
  */
 const router = Router();
@@ -44,6 +50,9 @@ export const SPEC_PATHS = [
   "/plan/send_change_link",
   "/service/send_deactivation_link",
   "/sim/status",
+  "/incident/my_status",
+  "/complaint/history",
+  "/outage/send_troubleshooting_link",
   "/notification/send",
   "/ticket/create",
 ];
@@ -127,6 +136,24 @@ router.post(
   requireApiKey,
   requireJsonContentType,
   simStatus
+);
+router.post(
+  "/incident/my_status",
+  requireApiKey,
+  requireJsonContentType,
+  incidentStatus
+);
+router.post(
+  "/complaint/history",
+  requireApiKey,
+  requireJsonContentType,
+  complaintHistory
+);
+router.post(
+  "/outage/send_troubleshooting_link",
+  requireApiKey,
+  requireJsonContentType,
+  troubleshootingLinkSend
 );
 router.post(
   "/notification/send",

@@ -8,6 +8,7 @@ import { RechargeLink } from "../src/models/RechargeLink.js";
 import { PlanMessage } from "../src/models/PlanMessage.js";
 import { PlanChangeLink } from "../src/models/PlanChangeLink.js";
 import { Notification } from "../src/models/Notification.js";
+import { TroubleshootingLink } from "../src/models/TroubleshootingLink.js";
 
 const TEST_URI =
   process.env.MONGO_URI_TEST ||
@@ -107,6 +108,28 @@ export const SPEC_SUBSCRIBER = {
       ],
     },
   },
+  incident: {
+    found: true,
+    incidentId: "INC-20260914-0001",
+    status: "IN_PROGRESS",
+    title: "Network outage affecting mobile data",
+    summary: "We are investigating a service interruption in your area.",
+    startedAt: "20260914103000",
+    expectedRestorationAt: "20260914150000",
+    lastUpdatedAt: "20260914113000",
+  },
+  complaints: [
+    {
+      caseId: "CMP-20260910-0003",
+      type: "COMPLAINT",
+      category: "NETWORK",
+      status: "IN_PROGRESS",
+      summary: "Customer reported mobile data unavailable.",
+      createdAt: "20260910143000",
+      lastUpdatedAt: "20260912110000",
+      expectedResolutionAt: "20260915170000",
+    },
+  ],
 };
 
 export async function setupDb(namespace) {
@@ -123,6 +146,7 @@ export async function resetDb() {
     PlanMessage.deleteMany({}),
     PlanChangeLink.deleteMany({}),
     Notification.deleteMany({}),
+    TroubleshootingLink.deleteMany({}),
   ]);
   await Subscriber.create(SPEC_SUBSCRIBER);
 }

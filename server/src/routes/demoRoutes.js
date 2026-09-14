@@ -13,6 +13,7 @@ import { listPlanMessages } from "../services/planMessageService.js";
 import { listPlanChangeLinks } from "../services/planChangeLinkService.js";
 import { listNotifications } from "../services/notificationService.js";
 import { logger } from "../utils/logger.js";
+import { listTroubleshootingLinks } from "../services/troubleshootingLinkService.js";
 
 /**
  * NOT part of the UC1 spec. These exist only so the React console can show what
@@ -146,6 +147,20 @@ router.get("/notifications", async (req, res) => {
   } catch (err) {
     logger.error("demo/notifications failed", err);
     res.status(500).json({ message: "Unable to list notifications" });
+  }
+});
+
+router.get("/troubleshooting_links", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit || 20);
+    res.status(200).json({
+      troubleshootingLinks: await listTroubleshootingLinks(
+        Number.isFinite(limit) ? limit : 20
+      ),
+    });
+  } catch (err) {
+    logger.error("demo/troubleshooting_links failed", err);
+    res.status(500).json({ message: "Unable to list troubleshooting links" });
   }
 });
 

@@ -109,7 +109,12 @@ Mounted at exactly the paths in the spec — no `/api/v1` prefix. All require
 | 7 | `POST /plan/recommendations` | UC3 B | A recommended plan, plus the rest of the catalog in the same call |
 | 8 | `POST /plan/send_change_link` | UC3 B | Text a deep-link to actually switch plans |
 | 9 | `POST /notification/send` | UC3 B | Push a Smart App notification — the **first non-SMS channel** |
-| 10 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
+| 10 | `POST /service/send_deactivation_link` | UC4 B | Text a service deactivation link and USSD code |
+| 11 | `POST /sim/status` | UC4 C | Return the number's current validity state and expiry |
+| 12 | `POST /incident/my_status` | UC5 B1 | Return the caller's individual known-outage status and ETA |
+| 13 | `POST /complaint/history` | UC5 B3 | Return open complaint/enquiry status from CSM |
+| 14 | `POST /outage/send_troubleshooting_link` | UC5 B2 | Text troubleshooting steps and a deep-link |
+| 15 | `POST /ticket/create` | shared | Raise a ticket and return its reference |
 
 Endpoints 1–3 and 7 are lookups. Endpoints 4, 6, 8 and 9 are the project's
 **action** endpoints — each has a real-world side effect (an SMS or a push),

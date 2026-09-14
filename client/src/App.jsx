@@ -8,6 +8,7 @@ import RechargeLinkList from "./components/RechargeLinkList.jsx";
 import PlanMessageList from "./components/PlanMessageList.jsx";
 import PlanChangeLinkList from "./components/PlanChangeLinkList.jsx";
 import NotificationList from "./components/NotificationList.jsx";
+import TroubleshootingLinkList from "./components/TroubleshootingLinkList.jsx";
 import {
   callBalanceUsage,
   callUsageHistory,
@@ -20,6 +21,9 @@ import {
   callNotificationSend,
   callServiceDeactivationLink,
   callSimStatus,
+  callIncidentStatus,
+  callComplaintHistory,
+  callTroubleshootingLink,
   callTicketCreate,
   fetchTickets,
   fetchSubscribers,
@@ -27,6 +31,7 @@ import {
   fetchPlanMessages,
   fetchPlanChangeLinks,
   fetchNotifications,
+  fetchTroubleshootingLinks,
   UnauthorizedError,
 } from "./api.js";
 import { loadApiKey, saveApiKey } from "./apiKey.js";
@@ -42,6 +47,9 @@ import {
   notificationSendRequest,
   serviceDeactivationLinkRequest,
   simStatusRequest,
+  incidentStatusRequest,
+  complaintHistoryRequest,
+  troubleshootingLinkRequest,
   ticketCreateRequest,
 } from "./requests.js";
 import {
@@ -56,6 +64,9 @@ import {
   notificationReadback,
   serviceDeactivationReadback,
   simStatusReadback,
+  incidentStatusReadback,
+  complaintHistoryReadback,
+  troubleshootingLinkReadback,
   ticketReadback,
 } from "./readback.js";
 
@@ -73,6 +84,9 @@ export default function App() {
   const [notifBody, setNotifBody] = useState(() => notificationSendRequest());
   const [deactivationBody, setDeactivationBody] = useState(() => serviceDeactivationLinkRequest());
   const [simBody, setSimBody] = useState(() => simStatusRequest());
+  const [incidentBody, setIncidentBody] = useState(() => incidentStatusRequest());
+  const [complaintBody, setComplaintBody] = useState(() => complaintHistoryRequest());
+  const [troubleshootingBody, setTroubleshootingBody] = useState(() => troubleshootingLinkRequest());
   const [ticketBody, setTicketBody] = useState(() => ticketCreateRequest());
   const [balanceResult, setBalanceResult] = useState(null);
   const [usageResult, setUsageResult] = useState(null);
@@ -85,6 +99,9 @@ export default function App() {
   const [notifResult, setNotifResult] = useState(null);
   const [deactivationResult, setDeactivationResult] = useState(null);
   const [simResult, setSimResult] = useState(null);
+  const [incidentResult, setIncidentResult] = useState(null);
+  const [complaintResult, setComplaintResult] = useState(null);
+  const [troubleshootingResult, setTroubleshootingResult] = useState(null);
   const [ticketResult, setTicketResult] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
@@ -92,6 +109,7 @@ export default function App() {
   const [planMessages, setPlanMessages] = useState([]);
   const [planChangeLinks, setPlanChangeLinks] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [troubleshootingLinks, setTroubleshootingLinks] = useState([]);
   const [keyState, setKeyState] = useState(apiKey ? "unverified" : "missing");
   const [error, setError] = useState(null);
 
@@ -106,16 +124,18 @@ export default function App() {
       setPlanMessages([]);
       setPlanChangeLinks([]);
       setNotifications([]);
+      setTroubleshootingLinks([]);
       return;
     }
     try {
-      const [ticketList, subs, links, planSms, pchLinks, notifs] = await Promise.all([
+      const [ticketList, subs, links, planSms, pchLinks, notifs, troubleshooting] = await Promise.all([
         fetchTickets(),
         fetchSubscribers(),
         fetchRechargeLinks(),
         fetchPlanMessages(),
         fetchPlanChangeLinks(),
         fetchNotifications(),
+        fetchTroubleshootingLinks(),
       ]);
       setTickets(ticketList);
       setSubscribers(subs.subscribers ?? []);
@@ -123,6 +143,7 @@ export default function App() {
       setPlanMessages(planSms ?? []);
       setPlanChangeLinks(pchLinks ?? []);
       setNotifications(notifs ?? []);
+      setTroubleshootingLinks(troubleshooting ?? []);
       setKeyState("valid");
       setError(null);
     } catch (err) {
@@ -134,6 +155,7 @@ export default function App() {
         setPlanMessages([]);
         setPlanChangeLinks([]);
         setNotifications([]);
+        setTroubleshootingLinks([]);
         setError("That key was rejected. Check it with whoever runs the API.");
       } else {
         setKeyState("unverified");
@@ -168,6 +190,9 @@ export default function App() {
     setNotifBody(notificationSendRequest(next));
     setDeactivationBody(serviceDeactivationLinkRequest(next));
     setSimBody(simStatusRequest(next));
+    setIncidentBody(incidentStatusRequest(next));
+    setComplaintBody(complaintHistoryRequest(next));
+    setTroubleshootingBody(troubleshootingLinkRequest(next));
     setTicketBody(ticketCreateRequest(next));
   };
 
@@ -245,6 +270,25 @@ export default function App() {
     if (result.httpStatus === 401) setKeyState("rejected");
   };
 
+  const sendIncidentStatus = async (body) => {
+    const result = await callIncidentStatus(body);
+    setIncidentResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+  };
+
+  const sendComplaintHistory = async (body) => {
+    const result = await callComplaintHistory(body);
+    setComplaintResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+  };
+
+  const sendTroubleshootingLink = async (body) => {
+    const result = await callTroubleshootingLink(body);
+    setTroubleshootingResult(result);
+    if (result.httpStatus === 401) setKeyState("rejected");
+    else await refreshData();
+  };
+
   const sendTicket = async (body) => {
     const result = await callTicketCreate(body);
     setTicketResult(result);
@@ -275,8 +319,8 @@ export default function App() {
             UC2 recharge link (A), recharge details (B); UC3 plan details with
             history and the plan-details SMS (A), plan recommendations, the
             plan-change link and the Smart App notification (B); UC4 service
-            deactivation and SIM status; plus the shared ticket. Every response
-            is HTTP 200; the outcome is in{" "}
+            deactivation and SIM status; UC5 outage and complaint status; plus
+            the shared ticket. Every response is HTTP 200; the outcome is in{" "}
             <code>status</code>. All endpoints require an{" "}
             <code>x-api-key</code> header.
           </p>
@@ -407,6 +451,36 @@ export default function App() {
         />
 
         <EndpointPanel
+          path="/incident/my_status"
+          description="UC5 Branch 1 — check the customer's individual known-outage status and ETA."
+          body={incidentBody}
+          onBodyChange={setIncidentBody}
+          onSend={sendIncidentStatus}
+          result={incidentResult}
+          readback={readbackFor(incidentResult, incidentStatusReadback)}
+        />
+
+        <EndpointPanel
+          path="/complaint/history"
+          description="UC5 Branch 3 — retrieve open complaint and enquiry status from CSM."
+          body={complaintBody}
+          onBodyChange={setComplaintBody}
+          onSend={sendComplaintHistory}
+          result={complaintResult}
+          readback={readbackFor(complaintResult, complaintHistoryReadback)}
+        />
+
+        <EndpointPanel
+          path="/outage/send_troubleshooting_link"
+          description="UC5 Branch 2 — text a troubleshooting deep-link and steps for the selected issue."
+          body={troubleshootingBody}
+          onBodyChange={setTroubleshootingBody}
+          onSend={sendTroubleshootingLink}
+          result={troubleshootingResult}
+          readback={readbackFor(troubleshootingResult, troubleshootingLinkReadback)}
+        />
+
+        <EndpointPanel
           path="/ticket/create"
           description="Shared — log the issue and read back the reference."
           body={ticketBody}
@@ -422,6 +496,7 @@ export default function App() {
       <PlanMessageList messages={planMessages} onRefresh={refreshData} />
       <PlanChangeLinkList links={planChangeLinks} onRefresh={refreshData} />
       <NotificationList notifications={notifications} onRefresh={refreshData} />
+      <TroubleshootingLinkList links={troubleshootingLinks} onRefresh={refreshData} />
       <TicketList tickets={tickets} onRefresh={refreshData} />
     </div>
   );

@@ -164,6 +164,35 @@ const rechargeRecordSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// --- UC5 Service Outage ------------------------------------------------
+const incidentSchema = new mongoose.Schema(
+  {
+    found: { type: Boolean, required: true },
+    incidentId: { type: String, default: null },
+    status: { type: String, required: true },
+    title: { type: String, default: null },
+    summary: { type: String, default: null },
+    startedAt: { type: String, default: null, match: TIMESTAMP_PATTERN },
+    expectedRestorationAt: { type: String, default: null, match: TIMESTAMP_PATTERN },
+    lastUpdatedAt: { type: String, default: null, match: TIMESTAMP_PATTERN },
+  },
+  { _id: false }
+);
+
+const complaintSchema = new mongoose.Schema(
+  {
+    caseId: { type: String, required: true },
+    type: { type: String, required: true, enum: ["COMPLAINT", "ENQUIRY"] },
+    category: { type: String, required: true },
+    status: { type: String, required: true },
+    summary: { type: String, required: true },
+    createdAt: { type: String, required: true, match: TIMESTAMP_PATTERN },
+    lastUpdatedAt: { type: String, required: true, match: TIMESTAMP_PATTERN },
+    expectedResolutionAt: { type: String, default: null, match: TIMESTAMP_PATTERN },
+  },
+  { _id: false }
+);
+
 const subscriberSchema = new mongoose.Schema(
   {
     msisdn: { type: String, required: true, unique: true, index: true },
@@ -200,6 +229,9 @@ const subscriberSchema = new mongoose.Schema(
     previousPlans: { type: [previousPlanSchema], default: [] },
     // UC2 Branch B. Empty for a subscriber with no top-ups on file.
     rechargeHistory: { type: [rechargeRecordSchema], default: [] },
+    // UC5. Optional so existing subscribers remain valid without outage data.
+    incident: { type: incidentSchema, default: null },
+    complaints: { type: [complaintSchema], default: [] },
   },
   { collection: "subscribers", timestamps: true }
 );

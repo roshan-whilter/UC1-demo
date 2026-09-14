@@ -67,6 +67,15 @@ export const callServiceDeactivationLink = (rawBody) =>
 
 export const callSimStatus = (rawBody) => postJson("/sim/status", rawBody);
 
+export const callIncidentStatus = (rawBody) =>
+  postJson("/incident/my_status", rawBody);
+
+export const callComplaintHistory = (rawBody) =>
+  postJson("/complaint/history", rawBody);
+
+export const callTroubleshootingLink = (rawBody) =>
+  postJson("/outage/send_troubleshooting_link", rawBody);
+
 export const callTicketCreate = (rawBody) => postJson("/ticket/create", rawBody);
 
 /** Thrown for a 401 so the UI can tell "bad key" from "server is down". */
@@ -99,3 +108,6 @@ export const fetchPlanChangeLinks = async () =>
 
 export const fetchNotifications = async () =>
   (await getJson("/demo/notifications?limit=20")).notifications;
+
+export const fetchTroubleshootingLinks = async () =>
+  (await getJson("/demo/troubleshooting_links?limit=20")).troubleshootingLinks;

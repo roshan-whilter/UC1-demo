@@ -156,6 +156,43 @@ export const simStatusRequest = (msisdn = "85510234567") =>
     2
   );
 
+/** UC5 Branch 1 — retrieve the customer's individual incident status. */
+export const incidentStatusRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-inc-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+    },
+    null,
+    2
+  );
+
+/** UC5 Branch 3 — retrieve open complaint/enquiry history from CSM. */
+export const complaintHistoryRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-cmp-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+    },
+    null,
+    2
+  );
+
+/** UC5 Branch 2 — send troubleshooting steps for the selected issue. */
+export const troubleshootingLinkRequest = (msisdn = "85510234567") =>
+  JSON.stringify(
+    {
+      requestId: `req-out-${shortId()}`,
+      timestamp: nowTimestamp(),
+      msisdn,
+      issueType: "MOBILE_DATA",
+    },
+    null,
+    2
+  );
+
 export const ticketCreateRequest = (msisdn = "85510234567") =>
   JSON.stringify(
     {

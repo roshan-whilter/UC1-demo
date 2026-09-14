@@ -103,4 +103,20 @@ export const config = {
   forceSimStatusErrorMsisdns: list(
     process.env.FORCE_SIM_STATUS_ERROR_MSISDNS ?? "85510999500"
   ),
+
+  // UC5 Service Outage demo levers.
+  forceIncidentStatusErrorMsisdns: list(
+    process.env.FORCE_INCIDENT_STATUS_ERROR_MSISDNS ?? "85510999500"
+  ),
+  forceComplaintHistoryErrorMsisdns: list(
+    process.env.FORCE_COMPLAINT_HISTORY_ERROR_MSISDNS ?? "85510999500"
+  ),
+  forceTroubleshootingSmsErrorMsisdns: list(
+    process.env.FORCE_TROUBLESHOOTING_SMS_ERROR_MSISDNS ?? "85510999500"
+  ),
+  troubleshootingLinkBaseUrl:
+    process.env.TROUBLESHOOTING_LINK_BASE_URL || "https://smart.com.kh/troubleshoot",
+  troubleshootingLinkTtlHours: Number(
+    process.env.TROUBLESHOOTING_LINK_TTL_HOURS || 24
+  ),
 };

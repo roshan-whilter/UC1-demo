@@ -388,3 +388,39 @@ export function simStatusReadback(body) {
   }[validity.type] ?? validity.type;
   return `${subscriber.name}, your number is ${state}. This validity state expires on ${expiry}.`;
 }
+
+/** UC5 Branch 1: report a known outage or continue to troubleshooting. */
+export function incidentStatusReadback(body) {
+  if (!body) return null;
+  if (body.status === "FAILURE") {
+    return "I'm sorry — I can't check the outage status right now. Let me put you through to a colleague who can help.";
+  }
+  const { subscriber, incident } = body;
+  if (!incident.found) {
+    return `${subscriber.name}, I can't see a known outage for your number right now. Let me guide you through some troubleshooting steps.`;
+  }
+  return `${subscriber.name}, there is a known issue: ${incident.summary} The expected restoration time is ${spokenDate(incident.expectedRestorationAt)}.`;
+}
+
+/** UC5 Branch 3: read back the current open complaint/enquiry cases. */
+export function complaintHistoryReadback(body) {
+  if (!body) return null;
+  if (body.status === "FAILURE") {
+    return "I'm sorry — I can't retrieve your complaint status right now. Let me put you through to a colleague who can help.";
+  }
+  if (body.complaints.length === 0) {
+    return "I can't find any open complaints or enquiries on this number. Is there anything else I can help with?";
+  }
+  const current = body.complaints[0];
+  return `Your ${current.type.toLowerCase()} ${current.caseId} is ${current.status.toLowerCase()}. ${current.summary} It was last updated on ${spokenDate(current.lastUpdatedAt.slice(0, 8))}.`;
+}
+
+/** UC5 Branch 2: confirm the troubleshooting SMS without claiming resolution. */
+export function troubleshootingLinkReadback(body) {
+  if (!body) return null;
+  if (body.status === "FAILURE") {
+    return "I wasn't able to text the troubleshooting link just now, but I can continue guiding you through the steps.";
+  }
+  const { troubleshooting } = body;
+  return `I've sent the troubleshooting steps to your number by SMS. The link is valid for 24 hours. Please try them and let me know whether the issue is resolved.`;
+}

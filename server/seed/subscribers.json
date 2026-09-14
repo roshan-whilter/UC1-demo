@@ -7,6 +7,17 @@
       "type": "FULL",
       "expiryDate": "20260930"
     },
+    "incident": {
+      "found": true,
+      "incidentId": "INC-20260914-0001",
+      "status": "IN_PROGRESS",
+      "title": "Network outage affecting mobile data",
+      "summary": "We are investigating a service interruption in your area.",
+      "startedAt": "20260914103000",
+      "expectedRestorationAt": "20260914150000",
+      "lastUpdatedAt": "20260914113000"
+    },
+    "complaints": [],
     "balance": {
       "main": {
         "amount": 2.75,
@@ -181,6 +192,17 @@
       "type": "ONE_WAY",
       "expiryDate": "20261015"
     },
+    "incident": {
+      "found": false,
+      "incidentId": null,
+      "status": "NONE",
+      "title": null,
+      "summary": null,
+      "startedAt": null,
+      "expectedRestorationAt": null,
+      "lastUpdatedAt": null
+    },
+    "complaints": [],
     "balance": {
       "main": {
         "amount": 12.4,
@@ -317,6 +339,17 @@
       "type": "TWO_WAY",
       "expiryDate": "20260925"
     },
+    "incident": {
+      "found": false,
+      "incidentId": null,
+      "status": "NONE",
+      "title": null,
+      "summary": null,
+      "startedAt": null,
+      "expectedRestorationAt": null,
+      "lastUpdatedAt": null
+    },
+    "complaints": [],
     "balance": {
       "main": {
         "amount": 0,
@@ -360,6 +393,28 @@
       "type": "FULL",
       "expiryDate": "20260930"
     },
+    "incident": {
+      "found": false,
+      "incidentId": null,
+      "status": "NONE",
+      "title": null,
+      "summary": null,
+      "startedAt": null,
+      "expectedRestorationAt": null,
+      "lastUpdatedAt": null
+    },
+    "complaints": [
+      {
+        "caseId": "CMP-20260910-0003",
+        "type": "COMPLAINT",
+        "category": "NETWORK",
+        "status": "IN_PROGRESS",
+        "summary": "Customer reported mobile data unavailable.",
+        "createdAt": "20260910143000",
+        "lastUpdatedAt": "20260912110000",
+        "expectedResolutionAt": "20260915170000"
+      }
+    ],
     "balance": {
       "main": {
         "amount": 5.0,
@@ -445,6 +500,17 @@
       "type": "FULL",
       "expiryDate": "20261010"
     },
+    "incident": {
+      "found": false,
+      "incidentId": null,
+      "status": "NONE",
+      "title": null,
+      "summary": null,
+      "startedAt": null,
+      "expectedRestorationAt": null,
+      "lastUpdatedAt": null
+    },
+    "complaints": [],
     "balance": {
       "main": {
         "amount": 8.2,
@@ -593,6 +659,17 @@
       "type": "FULL",
       "expiryDate": "20261130"
     },
+    "incident": {
+      "found": true,
+      "incidentId": "INC-20260914-0002",
+      "status": "IN_PROGRESS",
+      "title": "Voice service interruption",
+      "summary": "A voice service interruption is being investigated.",
+      "startedAt": "20260914090000",
+      "expectedRestorationAt": "20260914140000",
+      "lastUpdatedAt": "20260914110000"
+    },
+    "complaints": [],
     "balance": {
       "main": {
         "amount": 15.75,
